@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.29)
 
 # List all files containing tests. (Change as needed)
 set(TESTFILES        # All .cpp files in tests/
@@ -17,8 +17,17 @@ target_link_libraries(${TEST_MAIN} PRIVATE ${LIBRARY_NAME} doctest)
 set_target_properties(${TEST_MAIN} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 target_set_warnings(${TEST_MAIN} ENABLE ALL AS_ERROR ALL DISABLE Annoying) # Set warnings (if needed).
 
+# Suppress unused parameter warnings across different compilers in tests only.
+# MSVC issues warning C4100 for unused parameters, which we disable using /wd4100.
+# GCC/Clang use -Wunused-parameter, which we suppress with -Wno-unused-parameter.
+if(MSVC)
+    target_compile_options(${TEST_MAIN} PRIVATE /wd4100)
+else()
+    target_compile_options(${TEST_MAIN} PRIVATE -Wno-unused-parameter)
+endif()
+
 set_target_properties(${TEST_MAIN} PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
 )

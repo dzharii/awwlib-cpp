@@ -5,7 +5,7 @@
 #
 # For many purposes, you may not need to change anything about this file.
 
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.29)
 
 # Set project name, version and laguages here. (change as needed)
 # Version numbers are available by including "exampleConfig.h" in
@@ -72,7 +72,7 @@ target_enable_lto(main optimized)  # enable link-time-optimization if available 
 set_target_properties(
     ${LIBRARY_NAME} main
       PROPERTIES
-        CXX_STANDARD 17
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
 )
