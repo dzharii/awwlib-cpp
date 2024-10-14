@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.22)
 
 # List all files containing tests. (Change as needed)
 set(TESTFILES        # All .cpp files in tests/
@@ -14,7 +14,6 @@ set(TEST_RUNNER_PARAMS "")  # Any arguemnts to feed the test runner (change as n
 # --------------------------------------------------------------------------------
 add_executable(${TEST_MAIN} ${TESTFILES})
 target_link_libraries(${TEST_MAIN} PRIVATE ${LIBRARY_NAME} doctest)
-set_target_properties(${TEST_MAIN} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 target_set_warnings(${TEST_MAIN} ENABLE ALL AS_ERROR ALL DISABLE Annoying) # Set warnings (if needed).
 
 # Suppress unused parameter warnings across different compilers in tests only.
@@ -27,6 +26,8 @@ else()
 endif()
 
 set_target_properties(${TEST_MAIN} PROPERTIES
+    # Ensure the test executable is placed in the same directory as the main application.
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
