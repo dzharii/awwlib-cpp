@@ -13,14 +13,9 @@ $ErrorActionPreference = "Stop"
 $ThisScriptFolderPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 $COMMAND_HELP = "help"
-$COMMAND_CREATE_COMPONENT = "create-component"
-$COMMAND_TAR = "tar"
 $COMMAND_MDTREE = "mdtree"
 $COMMAND_BUILD_RELEASE = "build-release"
 $COMMAND_BUILD_DEBUG = "build-debug"
-$COMMAND_DEV = "dev"
-$COMMAND_CODE = "code"
-$COMMAND_RUN = "run"
 $COMMAND_GEN = "gen"
 
 $HELP_MESSAGE = @"
@@ -32,12 +27,6 @@ Commands:
     $($COMMAND_HELP):
       Shows this help message
 
-    $($COMMAND_CREATE_COMPONENT) -Name <component_name>:
-      Creates a new component based on the template by replacing the template tokens with the specified component name.
-
-    $($COMMAND_TAR):
-      Compresses the specified directories and file into a tar archive.
-
     $($COMMAND_MDTREE) [-OnlyFilePrefix <prefix>]:
       Generates a markdown documentation for C++ files.
         - OnlyFilePrefix: Generates documentation only for files that have the specified prefix in their name.
@@ -47,15 +36,6 @@ Commands:
 
     $($COMMAND_DEBUG_RELEASE):
       Builds the project using platform-specific build scripts and runs unit tests.
-
-    $($COMMAND_DEV):
-      Runs an infinite loop that builds the release version, starts the executable, monitors it, and rebuilds upon termination.
-
-    $($COMMAND_RUN):
-      Runs the executable
-
-    $($COMMAND_CODE):
-      Opens the current directory in Visual Studio Code.
 
     $($COMMAND_GEN) -Name <file_path>:
       Generates boilerplate header and source files for a new component. The file path should be in the format <type>/<name>,
@@ -158,81 +138,6 @@ function Invoke-Build {
     Write-Host "Build and test process completed successfully." -ForegroundColor Green
 }
 
-function Monitor-Executable {
-    param(
-        [string]$ExecutablePath
-    )
-
-    Write-Host "Starting executable: $ExecutablePath" -ForegroundColor Cyan
-    Start-Process -FilePath $ExecutablePath -Wait
-    Write-Host "Executable process has terminated." -ForegroundColor Yellow
-}
-
-function Get-ExecutablePath {
-    $executablePath = $null
-    if ([Environment]::OSVersion.Platform -eq "Unix") {
-        $executablePath = "./build/Release/aww-hudini"
-    } else {
-        $executablePath = ".\build\Release\aww-hudini.exe"
-    }
-    return $executablePath
-
-}
-
-function Run-DevLoop {
-
-    while ($true) {
-        Invoke-Build -BuildType "Release"
-
-        $executablePath = Get-ExecutablePath
-
-        if (Test-Path $executablePath) {
-            Monitor-Executable -ExecutablePath $executablePath
-        } else {
-            Write-Host "Executable not found at $executablePath. Exiting loop." -ForegroundColor Red
-            break
-        }
-    }
-}
-
-function Create-Component {
-    param(
-        [string]$ComponentName
-    )
-
-    $templatePath = Join-Path -Path $ThisScriptFolderPath -ChildPath "include/app/__wx_component_name___component"
-    $newComponentPath = $templatePath.Replace("__wx_component_name___component", "$($ComponentName)_component")
-
-    if (Test-Path $newComponentPath) {
-        Write-Host "Component already exists: $newComponentPath" -ForegroundColor Red
-        return
-    }
-
-    Copy-Item -Path $templatePath -Destination $newComponentPath -Recurse -Force
-
-    Get-ChildItem -Path $newComponentPath -Recurse | Where-Object { $_.PSIsContainer -eq $false } | ForEach-Object {
-        $content = Get-Content $_.FullName -Raw
-        $content = $content.Replace("__wx_component_name__", $ComponentName).Replace("__WX_COMPONENT_NAME__", $ComponentName.ToUpper()).Replace("[[maybe_unused]]", "")
-        Set-Content -Path $_.FullName -Value $content
-        $newName = $_.Name.Replace("__wx_component_name___component", "$($ComponentName)_component").Replace("__wx_component_name__", $ComponentName)
-        Rename-Item -Path $_.FullName -NewName $newName
-    }
-
-    Write-Host "Component created at: $newComponentPath" -ForegroundColor Green
-}
-
-function Create-Tar {
-    $tarFileName = "$(Get-Date -Format 'yyyy-MM-dd')-source.tar"
-    $tarFilePath = Join-Path -Path $ThisScriptFolderPath -ChildPath $tarFileName
-
-    $filesToTar = @('app', 'include', 'src', 'CMakeLists.txt')
-    $tarArguments = @("-cf", $tarFilePath) + $filesToTar
-
-    Write-Host "Creating tar file: $tarFilePath" -ForegroundColor Cyan
-    & tar $tarArguments
-    Write-Host "Tar file created: $tarFilePath" -ForegroundColor Green
-}
-
 function Create-MDTREE {
     param(
         [Parameter(Mandatory = $false)]
@@ -274,10 +179,6 @@ function Create-MDTREE {
 
     $markdown | Out-File $outputFilePath -Encoding utf8
     Write-Host "Markdown documentation generated at: $outputFilePath" -ForegroundColor Green
-}
-
-function Open-Code {
-    Start-Process "code" "."
 }
 
 function Generate-Files {
@@ -405,18 +306,6 @@ switch ($Command.ToLower()) {
         Write-Host $HELP_MESSAGE
     }
 
-    $COMMAND_CREATE_COMPONENT {
-        if (-not $Name) {
-            Write-Host "Error: -Name parameter is required for the $($COMMAND_CREATE_COMPONENT) command" -ForegroundColor Red
-            exit 1
-        }
-        Create-Component -ComponentName $Name
-    }
-
-    $COMMAND_TAR {
-        Create-Tar
-    }
-
     $COMMAND_MDTREE {
         Create-MDTREE -OnlyFilePrefix $OnlyFilePrefix
     }
@@ -427,26 +316,6 @@ switch ($Command.ToLower()) {
 
     $COMMAND_BUILD_RELEASE {
         Invoke-Build -BuildType "Release"
-    }
-
-    $COMMAND_DEV {
-        Run-DevLoop
-    }
-
-    $COMMAND_RUN {
-        $executablePath = Get-ExecutablePath
-
-        if (Test-Path $executablePath) {
-            Start-Process $executablePath
-        } else {
-            Write-Host "Executable not found at $executablePath." -ForegroundColor Red
-            break
-        }
-
-    }
-
-    $COMMAND_CODE {
-        Open-Code
     }
 
     $COMMAND_GEN {
