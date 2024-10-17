@@ -34,10 +34,10 @@ Commands:
     $($COMMAND_BUILD_RELEASE):
       Builds the project using platform-specific build scripts and runs unit tests.
 
-    $($COMMAND_DEBUG_RELEASE):
+    $($COMMAND_BUILD_DEBUG):
       Builds the project using platform-specific build scripts and runs unit tests.
 
-    $($COMMAND_GEN) -Name <file_path>:
+    $($COMMAND_GEN) -Name <file_name>:
       Generates boilerplate header and source files for a new component. The file path should be in the format <type>/<name>,
       such as 'model/componentName', which will create 'include/model/componentName.hpp' and 'src/model/componentName.cpp'.
       The new source file is also automatically added to the CMakeLists.txt file in the appropriate section.
@@ -71,7 +71,7 @@ switch ($Command.ToLower()) {
             Write-Host "Error: -Name parameter is required for the $($COMMAND_GEN) command" -ForegroundColor Red
             exit 1
         }
-        Generate-Files -FilePath $Name
+        Generate-Files -FileName $Name
     }
 
     Default {

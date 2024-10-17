@@ -1,117 +1,116 @@
 function Generate-Files {
-    param(
-        [string]$FilePath
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({ ($_ -notmatch '\\') -and ($_ -notmatch '/') -and ($_ -notmatch '\.') })] # Validate filename without path or extension
+        [string]$FileName
     )
 
-    $allowedDirectories = @{
-        'model' = '#875mpibn7z4'
-    }
+    # Convert filename to lowercase to ensure consistency in file naming
+    $FileName = $FileName.ToLower()
 
-    $baseDir = "include"
-    $srcDir = "src"
-    $allowedKeys = @("model")
+    # Define file paths to be generated
+    $faPath = "include\$($FileName)\$($FileName).hpp"
+    $fbPath = "src\$($FileName)\$($FileName).cpp"
+    $fcPath = "tests\$($FileName)\$($FileName).cpp"
 
-    $splitPath = $FilePath.Split("/")
-    if ($splitPath.Count -ne 2) {
-        Write-Error "Invalid file path. It should be in the format: <type>/<name>"
-        return
-    }
-
-    $key = $splitPath[0]
-    $name = $splitPath[1]
-
-    if (-not $allowedKeys -contains $key) {
-        Write-Error "Invalid key: '$($key)'. Allowed keys are: '$($allowedKeys)'"
-        return
-    }
-
-    $marker = $allowedDirectories[$key]
-
-    $headerFile = Join-Path -Path $ThisScriptFolderPath -ChildPath "$($baseDir)/$($key)/$($name).hpp"
-    $sourceFile = Join-Path -Path $ThisScriptFolderPath -ChildPath "$($srcDir)/$($key)/$($name).cpp"
-
-    if (Test-Path $headerFile) {
-        Write-Error "File $($headerFile) already exists. Aborting."
-        return
-    }
-
-    if (Test-Path $sourceFile) {
-        Write-Error "File $($sourceFile) already exists. Aborting."
-        return
-    }
-
-    $headerContent = @"
+    # Generate file content in memory
+    $faContent = @"
 #pragma once
-#ifndef $($name.ToUpper())_HPP
-#define $($name.ToUpper())_HPP
+#ifndef $($FileName.ToUpper())_HPP
+#define $($FileName.ToUpper())_HPP
 
-class $($name) {
-public:
-    $($name)() = default;
-    ~$($name)() = default;
-};
+namespace aww {
 
-#endif // $($name.ToUpper())_HPP
+} // end of namespace
+#endif // $($FileName.ToUpper())_HPP
 "@
 
-    $sourceContent = @"
-#include "$($key)/$($name).hpp"
+    $fbContent = @"
+#include "$($FileName)/$($FileName).hpp"
 
+namespace aww {
+
+} // end of namespace
 "@
 
-    # Update CMakeLists.txt
-    $cmakeFile = Join-Path -Path $ThisScriptFolderPath -ChildPath "CMakeLists.txt"
+    $fcContent = @"
+#include "doctest/doctest.h"
+#include "$($FileName)/$($FileName).hpp"
 
-    $cmakeLinesArray = [System.IO.File]::ReadAllLines($cmakeFile)
-    $cmakeLines = [System.Collections.Generic.List[string]]::new($cmakeLinesArray)
+TEST_CASE("testcase template 1") {
+    SUBCASE("sub testcase template 1") {
 
-    $markerFound = $false
-    $insertIndex = -1
+    }
+}
+"@
 
-    Write-Host "Searching for '$marker' in CMakeLists.txt"
-    for ($i = 0; $i -lt $cmakeLines.Count; $i++) {
+    # Check if files already exist
+    $existingFiles = @()
+    if (Test-Path -Path $faPath) { $existingFiles += $faPath }
+    if (Test-Path -Path $fbPath) { $existingFiles += $fbPath }
+    if (Test-Path -Path $fcPath) { $existingFiles += $fcPath }
 
-        $line = $cmakeLines[$i]
+    if ($existingFiles.Count -gt 0) {
+        Write-Error "Error: The following files already exist:"
+        $existingFiles | ForEach-Object { Write-Error $_ }
+        return
+    }
 
-        if ($line.IndexOf($marker) -ge 0) {
-            $markerFound = $true
+    # Create the directories if they do not exist
+    if (-not (Test-Path -Path "include/$($FileName)")) {
+        New-Item -Path "include/$($FileName)" -ItemType Directory | Out-Null
+    }
+    Set-Content -Path $faPath -Value $faContent
+
+    if (-not (Test-Path -Path "src/$($FileName)")) {
+        New-Item -Path "src/$($FileName)" -ItemType Directory | Out-Null
+    }
+    Set-Content -Path $fbPath -Value $fbContent
+
+    if (-not (Test-Path -Path "tests/$($FileName)")) {
+        New-Item -Path "tests/$($FileName)" -ItemType Directory | Out-Null
+    }
+    Set-Content -Path $fcPath -Value $fcContent
+
+    # Modify CMakeLists.txt files
+    $cmakeListPath = "CMakeLists.txt"
+    $testsCmakeListPath = "tests/CMakeLists.txt"
+
+    # Update main CMakeLists.txt
+    if (Test-Path -Path $cmakeListPath) {
+        try {
+            $cmakeContent = Get-Content -Path $cmakeListPath
+            $marker = "#ge0mh0v43gk"
+            $index = $cmakeContent.IndexOf($marker)
+            if ($index -ge 0) {
+                $cmakeContent = $cmakeContent.Insert($index, "    src/$($FileName)/$($FileName).cpp`n"); Set-Content -Path $cmakeListPath -Value $cmakeContent
+                Write-Host "Modified: $($cmakeListPath)"
+            }
+        } catch {
+            Write-Error "Failed to read or modify $($cmakeListPath): $_"
+            return
         }
-        elseif ($markerFound -and [string]::IsNullOrWhiteSpace($line)) {
-            Write-Host "Found insertion point at line $($i)"
-            $insertIndex = $i
-            break
+    }
+
+    # Update tests CMakeLists.txt
+    if (Test-Path -Path $testsCmakeListPath) {
+        try {
+            $testsCmakeContent = Get-Content -Path $testsCmakeListPath
+            $testsMarker = "#faudv6fbgzt"
+            $testsIndex = $testsCmakeContent.IndexOf($testsMarker)
+            if ($testsIndex -ge 0) {
+                $testsCmakeContent = $testsCmakeContent.Insert($testsIndex, "    $($FileName)/$($FileName).cpp`n"); Set-Content -Path $testsCmakeListPath -Value $testsCmakeContent
+                Write-Host "Modified: $($testsCmakeListPath)"
+            }
+        } catch {
+            Write-Error "Failed to read or modify $($testsCmakeListPath): $_"
+            return
         }
     }
 
-    if (-not $markerFound) {
-        Write-Error "Marker '$($marker)' not found in CMakeLists.txt. Aborting."
-        return
-    }
-
-    if ($insertIndex -eq -1) {
-        Write-Error "Could not find insertion point in CMakeLists.txt. Aborting."
-        return
-    }
-
-    $newEntry = "    $srcDir/$key/$name.cpp"
-    $cmakeLines.Insert($insertIndex, $newEntry)
-
-    # Write changes to CMakeLists.txt
-    try {
-        New-Item -ItemType File -Path $headerFile -Force
-        New-Item -ItemType File -Path $sourceFile -Force
-        Set-Content -Path $headerFile -Value $headerContent -Encoding UTF8
-        Set-Content -Path $sourceFile -Value $sourceContent -Encoding UTF8
-
-        Write-Host "Files generated:" -ForegroundColor Green
-        Write-Host "  $headerFile" -ForegroundColor Green
-        Write-Host "  $sourceFile" -ForegroundColor Green
-
-
-        [System.IO.File]::WriteAllLines($cmakeFile, $cmakeLines)
-        Write-Host "CMakeLists.txt updated." -ForegroundColor Green
-    } catch {
-        Write-Error "Failed to write changes to CMakeLists.txt. Aborting."
-        return
-    }
+    # Report
+    Write-Host "Generated files:"
+    Write-Host " - $($faPath)"
+    Write-Host " - $($fbPath)"
+    Write-Host " - $($fcPath)"
 }
