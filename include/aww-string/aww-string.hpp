@@ -17,9 +17,8 @@ void string_trim_inplace(std::string& str);
  * @brief Trims whitespace from the end of a string. #o4qbhyieany
  *
  * @param str The string to trim.
- * @return std::string The trimmed string.
  */
-std::string string_trim_right(std::string str);
+void string_trim_right_inplace(std::string& str);
 
 
 } // end of namespace

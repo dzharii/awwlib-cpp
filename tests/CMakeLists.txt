@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.22)
 set(TESTFILES        # All .cpp files in tests/
     main.cpp
     dummy.cpp
+    aww-string/aww-string-tests.cpp
+    aww-os/aww-os.cpp
+    #faudv6fbgzt
 )
 
 set(TEST_MAIN unit_tests)   # Default name for test executable (change if you wish).

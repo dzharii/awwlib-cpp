@@ -39,6 +39,7 @@ find_lto(CXX)
 set(SOURCES          # All .cpp files in src/
     src/example.cpp
     src/aww-string/aww-string.cpp
+    src/aww-os/aww-os.cpp
     #ge0mh0v43gk
 )
 set(TESTFILES        # All .cpp files in tests/

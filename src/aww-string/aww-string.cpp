@@ -13,12 +13,11 @@ void string_trim_inplace(std::string& str) {
 }
 
 // #o4qbhyieany
-std::string string_trim_right(std::string str) {
+void string_trim_right_inplace(std::string& str) {
   str.erase(
       std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) { return !std::isspace(ch); })
           .base(),
       str.end());
-  return str;
 }
 
 }
