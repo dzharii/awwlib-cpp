@@ -1,9 +1,14 @@
 function Generate-Files {
     param (
         [Parameter(Mandatory = $true)]
-        [ValidateScript({ ($_ -notmatch '\') -and ($_ -notmatch '/') -and ($_ -notmatch '\.') })] # Validate filename without path or extension
         [string]$FileName
     )
+
+    # Validate file name
+    if ($FileName -match '[^a-zA-Z0-9]') {
+        Write-Error "Error: File name must contain only alphanumeric characters. Error in: '$($FileName)'"
+        return
+    }
 
     # Convert filename to lowercase to ensure consistency in file naming
     $FileName = $FileName.ToLower()
