@@ -1,7 +1,7 @@
 function Generate-Files {
     param (
         [Parameter(Mandatory = $true)]
-        [ValidateScript({ ($_ -notmatch '\\') -and ($_ -notmatch '/') -and ($_ -notmatch '\.') })] # Validate filename without path or extension
+        [ValidateScript({ ($_ -notmatch '\') -and ($_ -notmatch '/') -and ($_ -notmatch '\.') })] # Validate filename without path or extension
         [string]$FileName
     )
 
@@ -13,16 +13,33 @@ function Generate-Files {
     $fbPath = "src\$($FileName)\$($FileName).cpp"
     $fcPath = "tests\$($FileName)\$($FileName).cpp"
 
+    function Get-CppValidIdentifier {
+        param (
+            [string]$inputString
+        )
+        return ($inputString -replace '[^a-zA-Z0-9]', '_').ToUpper()
+    }
+
+    function New-DirectoryIfNotExists {
+        param (
+            [string]$directoryPath
+        )
+        if (-not (Test-Path -Path $directoryPath)) {
+            New-Item -Path $directoryPath -ItemType Directory | Out-Null
+        }
+    }
+
     # Generate file content in memory
+    $cppIdentifier = Get-CppValidIdentifier -inputString $FileName
     $faContent = @"
 #pragma once
-#ifndef $($FileName.ToUpper())_HPP
-#define $($FileName.ToUpper())_HPP
+#ifndef ${cppIdentifier}_HPP
+#define ${cppIdentifier}_HPP
 
 namespace aww {
 
 } // end of namespace
-#endif // $($FileName.ToUpper())_HPP
+#endif // ${cppIdentifier}_HPP
 "@
 
     $fbContent = @"
@@ -57,56 +74,54 @@ TEST_CASE("testcase template 1") {
     }
 
     # Create the directories if they do not exist
-    if (-not (Test-Path -Path "include/$($FileName)")) {
-        New-Item -Path "include/$($FileName)" -ItemType Directory | Out-Null
-    }
+    New-DirectoryIfNotExists -directoryPath "include/$($FileName)"
     Set-Content -Path $faPath -Value $faContent
 
-    if (-not (Test-Path -Path "src/$($FileName)")) {
-        New-Item -Path "src/$($FileName)" -ItemType Directory | Out-Null
-    }
+    New-DirectoryIfNotExists -directoryPath "src/$($FileName)"
     Set-Content -Path $fbPath -Value $fbContent
 
-    if (-not (Test-Path -Path "tests/$($FileName)")) {
-        New-Item -Path "tests/$($FileName)" -ItemType Directory | Out-Null
-    }
+    New-DirectoryIfNotExists -directoryPath "tests/$($FileName)"
     Set-Content -Path $fcPath -Value $fcContent
 
     # Modify CMakeLists.txt files
     $cmakeListPath = "CMakeLists.txt"
     $testsCmakeListPath = "tests/CMakeLists.txt"
 
-    # Update main CMakeLists.txt
-    if (Test-Path -Path $cmakeListPath) {
-        try {
-            $cmakeContent = Get-Content -Path $cmakeListPath
-            $marker = "#ge0mh0v43gk"
-            $index = $cmakeContent.IndexOf($marker)
-            if ($index -ge 0) {
-                $cmakeContent = $cmakeContent.Insert($index, "    src/$($FileName)/$($FileName).cpp`n"); Set-Content -Path $cmakeListPath -Value $cmakeContent
-                Write-Host "Modified: $($cmakeListPath)"
+    function Set-ContentLineBeforeMarker {
+        param (
+            [string]$filePath,
+            [string]$marker,
+            [string]$lineToInsert
+        )
+
+        if (Test-Path -Path $filePath) {
+            try {
+                $content = Get-Content -Path $filePath
+                $newContent = New-Object System.Collections.Generic.List[System.String]
+                $inserted = $false
+
+                foreach ($line in $content) {
+                    if (-not $inserted -and $line -match $marker) {
+                        $newContent.Add($lineToInsert)
+                        $inserted = $true
+                    }
+                    $newContent.Add($line)
+                }
+
+                Set-Content -Path $filePath -Value $newContent
+                Write-Host "Modified: $($filePath)"
+            } catch {
+                Write-Error "Failed to read or modify $($filePath): $_"
+                return
             }
-        } catch {
-            Write-Error "Failed to read or modify $($cmakeListPath): $_"
-            return
         }
     }
 
+    # Update main CMakeLists.txt
+    Set-ContentLineBeforeMarker -filePath $cmakeListPath -marker "#ge0mh0v43gk" -lineToInsert "    src/$($FileName)/$($FileName).cpp"
+
     # Update tests CMakeLists.txt
-    if (Test-Path -Path $testsCmakeListPath) {
-        try {
-            $testsCmakeContent = Get-Content -Path $testsCmakeListPath
-            $testsMarker = "#faudv6fbgzt"
-            $testsIndex = $testsCmakeContent.IndexOf($testsMarker)
-            if ($testsIndex -ge 0) {
-                $testsCmakeContent = $testsCmakeContent.Insert($testsIndex, "    $($FileName)/$($FileName).cpp`n"); Set-Content -Path $testsCmakeListPath -Value $testsCmakeContent
-                Write-Host "Modified: $($testsCmakeListPath)"
-            }
-        } catch {
-            Write-Error "Failed to read or modify $($testsCmakeListPath): $_"
-            return
-        }
-    }
+    Set-ContentLineBeforeMarker -filePath $testsCmakeListPath -marker "#faudv6fbgzt" -lineToInsert "    $($FileName)/$($FileName).cpp"
 
     # Report
     Write-Host "Generated files:"
