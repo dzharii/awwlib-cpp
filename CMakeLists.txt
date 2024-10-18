@@ -12,7 +12,14 @@ cmake_minimum_required(VERSION 3.22)
 # the source. See exampleConfig.h.in for some more details.
 project(AWWLIB VERSION 1.0.0 LANGUAGES CXX)
 
-# This magic allows to build Debug and Release configuration in separate 
+# Determine if we are the top-level project
+if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(AWWLIB_TOPLEVEL_PROJECT TRUE)
+else()
+    set(AWWLIB_TOPLEVEL_PROJECT FALSE)
+endif()
+
+# This magic allows to build Debug and Release configuration in separate
 # directories for Windows / Linux
 set(MY_BUILD_OUTPUT_DIRECTORY "")
 if(CMAKE_CONFIGURATION_TYPES)
@@ -93,5 +100,7 @@ set_target_properties(
         CXX_EXTENSIONS NO
 )
 
-# Set up tests (see tests/CMakeLists.txt).
-add_subdirectory(tests)
+if (AWWLIB_TOPLEVEL_PROJECT)
+    # Set up tests (see tests/CMakeLists.txt).
+    add_subdirectory(tests)
+endif()
