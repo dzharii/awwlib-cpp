@@ -4,6 +4,7 @@
 
 #include <string>
 #include <optional>
+#include <filesystem>
 
 namespace aww {
 
@@ -14,6 +15,33 @@ namespace aww {
  *         or an empty optional if the variable is not set.
  */
 std::optional<std::string> getenv(const std::string& env_variable_name);
+
+/**
+ * Retrieves the absolute path of the current executable.
+ *
+ * This function determines the path of the executable file
+ * of the current running process. It uses platform-specific
+ * API calls to ensure accurate retrieval of the path.
+ *
+ * @return std::filesystem::path containing the absolute path
+ *         of the executable. If the path cannot be determined,
+ *         an empty std::filesystem::path object is returned.
+ *
+ * @throws std::runtime_error on failure to determine the path
+ *         when system API calls fail (primarily on Linux).
+ */
+std::filesystem::path get_current_executable_path();
+
+/**
+ * Retrieves the home directory of the current user.
+ *
+ * This function uses platform-specific methods to determine the home directory of the current user.
+ * It works across different operating systems such as Windows and Linux.
+ *
+ * @return std::optional<std::filesystem::path> containing the user's home directory path.
+ * @throws std::runtime_error if the home directory cannot be determined.
+ */
+std::optional<std::filesystem::path> get_user_home_folder();
 
 } // end of namespace
 #endif // AWW_OS_HPP

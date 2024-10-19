@@ -65,6 +65,19 @@ set(SOURCES          # All .cpp files in src/
     src/aww-os/aww-os.cpp
     #ge0mh0v43gk
 )
+
+if(WIN32)
+    list(APPEND SOURCES
+        src/aww-os/aww-os-windows.cpp
+    )
+elseif(UNIX AND NOT APPLE)
+    list(APPEND SOURCES
+        src/aww-os/aww-os-linux.cpp
+    )
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()
+
 set(TESTFILES        # All .cpp files in tests/
     #5x0qd25zn50
 )
