@@ -95,13 +95,20 @@ if (AWWLIB_BUILD_EXAMPLES)
     target_enable_lto(main optimized)  # enable link-time-optimization if available for non-debug configurations
     # Set the properties you require, e.g. what C++ standard to use. Here applied to library and main (change as needed).
     set_target_properties(
-        ${LIBRARY_NAME} main
+          main
           PROPERTIES
             CXX_STANDARD 20
             CXX_STANDARD_REQUIRED YES
             CXX_EXTENSIONS NO
     )
 endif()
+set_target_properties(
+    ${LIBRARY_NAME}
+    PROPERTIES
+      CXX_STANDARD 20
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO
+)
 
 if (AWWLIB_BUILD_TESTS)
     # Set up tests (see tests/CMakeLists.txt).
