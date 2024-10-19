@@ -24,7 +24,7 @@ int main() {
             << "."
             << PROJECT_VERSION_PATCH
             << std::endl;
-  std::system("cat ../LICENSE");
+  [[maybe_unused]]int res = std::system("cat ../LICENSE");
 
   // Bring in the dummy class from the example source,
   // just to show that it is accessible from main.cpp.
