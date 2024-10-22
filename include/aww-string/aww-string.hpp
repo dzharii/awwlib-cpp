@@ -3,6 +3,9 @@
 #define AWW_STRING_HPP
 
 #include <string>
+#include <vector>
+#include <algorithm>
+
 
 namespace aww {
 
@@ -19,6 +22,16 @@ void string_trim_inplace(std::string& str);
  * @param str The string to trim.
  */
 void string_trim_right_inplace(std::string& str);
+
+/**
+ * @brief Joins the elements of a vector into a single string with a specified delimiter. (aww tag #oibw1sg0jpv)
+ * @param collection A vector of `std::string_view` elements to be joined.
+ * @param delimiter A `std::string_view` that will be used to separate each element in the resulting string.
+ * @return A `std::string` containing all the elements of `collection`, separated by `delimiter`.
+ */
+[[nodiscard]] std::string join_vector(const std::vector<std::string_view>& collection, std::string_view delimiter);
+
+
 
 } // end of namespace
 #endif // AWW_STRING_HPP

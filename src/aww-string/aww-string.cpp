@@ -24,4 +24,35 @@ void string_trim_right_inplace(std::string& str) {
       str.end());
 }
 
+/**
+ * @brief Joins the elements of a vector into a single string with a specified delimiter. (aww tag #oibw1sg0jpv)
+ */
+[[nodiscard]] std::string join_vector(const std::vector<std::string_view> &collection, std::string_view delimiter)
+{
+    // This ensures that vector size is greater than zero,
+    // this makes v.size() - 1 to be safe.
+    if (collection.empty()) {
+        return std::string{};
+    }
+    size_t total_size = delimiter.size() * (collection.size() - 1);
+    for (const auto &item : collection) {
+        total_size += item.size();
+    }
+
+    // preallocate resulting string
+    std::string out{};
+
+    // Append elements with delimiter
+    bool first = true;
+    for (const auto &item : collection) {
+        if (!first) {
+            out.append(delimiter);
+        }
+        out.append(item);
+        first = false;
+    }
+    return out;
+}
+
+
 }

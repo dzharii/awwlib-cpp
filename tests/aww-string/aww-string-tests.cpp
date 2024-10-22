@@ -53,3 +53,10 @@ TEST_CASE("string_trim_right_inplace") {
         CHECK(str == "");
     }
 }
+
+TEST_CASE("aww::join_vector returns joined string (aww tag #oibw1sg0jpv)") {
+    CHECK(aww::join_vector({"hello", "world"}, " ") == "hello world");
+    CHECK(aww::join_vector({"hello", "world"}, " - ") == "hello - world");
+    CHECK(aww::join_vector({"hello"}, " - ") == "hello");
+    CHECK(aww::join_vector({}, " - ") == "");
+}
