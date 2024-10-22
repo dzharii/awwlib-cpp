@@ -7,19 +7,18 @@
 namespace aww {
 
 /**
- * @brief Trims whitespace from the beginning and end of a string. #y91j5qa0cn8
+ * @brief Trims whitespace from the beginning and end of a string. (aww tag #y91j5qa0cn8)
  *
  * @param str The string to trim.
  */
 void string_trim_inplace(std::string& str);
 
 /**
- * @brief Trims whitespace from the end of a string. #o4qbhyieany
+ * @brief Trims whitespace from the end of a string. (aww tag #o4qbhyieany)
  *
  * @param str The string to trim.
  */
 void string_trim_right_inplace(std::string& str);
-
 
 } // end of namespace
 #endif // AWW_STRING_HPP

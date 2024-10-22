@@ -3,7 +3,7 @@
 
 namespace aww {
 /**
- * @brief Retrieves the absolute path of the current executable.
+ * @brief Retrieves the absolute path of the current executable. (aww tag #fktryb18xts)
  */
 std::filesystem::path get_current_executable_path(void) {
   char buffer[MAX_PATH];
@@ -16,7 +16,7 @@ std::filesystem::path get_current_executable_path(void) {
 }
 
 /**
- * @brief Retrieves the home directory of the current user.
+ * @brief Retrieves the home directory of the current user. (aww tag #armgs22u42a)
  */
 std::optional<std::filesystem::path> get_user_home_folder() {
   auto home_drive = aww::getenv("HOMEDRIVE");
