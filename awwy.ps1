@@ -17,6 +17,7 @@ $COMMAND_MDTREE = "mdtree"
 $COMMAND_BUILD_RELEASE = "build-release"
 $COMMAND_BUILD_DEBUG = "build-debug"
 $COMMAND_GEN = "gen"
+$COMMAND_CLANG_FORMAT_AUTOFIX = "clang-format-autofix"
 
 $HELP_MESSAGE = @"
 Usage:
@@ -41,12 +42,16 @@ Commands:
       Generates boilerplate header and source files for a new component. The file path should be in the format <type>/<name>,
       such as 'model/componentName', which will create 'include/model/componentName.hpp' and 'src/model/componentName.cpp'.
       The new source file is also automatically added to the CMakeLists.txt file in the appropriate section.
+
+    $($COMMAND_CLANG_FORMAT_AUTOFIX):
+        Automatically formats source code files using clang-format.
 "@
 
 . $libPath/Get-Platform.ps1
 . $libPath/Invoke-Build.ps1
 . $libPath/Create-MDTREE.ps1
 . $libPath/Generate-Files.ps1
+. $libPath/Invoke-ClangFormatAutofix.ps1
 
 
 switch ($Command.ToLower()) {
@@ -72,6 +77,10 @@ switch ($Command.ToLower()) {
             exit 1
         }
         Generate-Files -FileName $Name
+    }
+
+    $COMMAND_CLANG_FORMAT_AUTOFIX {
+        Invoke-ClangFormatAutofix
     }
 
     Default {
