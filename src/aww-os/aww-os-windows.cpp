@@ -1,5 +1,5 @@
-#include "aww-os/aww-os.hpp"
 #include "Windows.h"
+#include "aww-os/aww-os.hpp"
 
 namespace aww {
 /**
@@ -30,4 +30,4 @@ std::optional<std::filesystem::path> get_user_home_folder() {
   }
   return std::nullopt;
 }
-} // end of namespace
+} // namespace aww

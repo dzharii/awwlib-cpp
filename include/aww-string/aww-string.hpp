@@ -2,10 +2,9 @@
 #ifndef AWW_STRING_HPP
 #define AWW_STRING_HPP
 
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
-
 
 namespace aww {
 
@@ -31,7 +30,5 @@ void string_trim_right_inplace(std::string& str);
  */
 [[nodiscard]] std::string join_vector(const std::vector<std::string_view>& collection, std::string_view delimiter);
 
-
-
-} // end of namespace
+} // namespace aww
 #endif // AWW_STRING_HPP

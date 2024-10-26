@@ -2,9 +2,9 @@
 #ifndef AWW_OS_HPP
 #define AWW_OS_HPP
 
-#include <string>
-#include <optional>
 #include <filesystem>
+#include <optional>
+#include <string>
 
 namespace aww {
 
@@ -43,5 +43,5 @@ std::filesystem::path get_current_executable_path();
  */
 std::optional<std::filesystem::path> get_user_home_folder();
 
-} // end of namespace
+} // namespace aww
 #endif // AWW_OS_HPP

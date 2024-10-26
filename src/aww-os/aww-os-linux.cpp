@@ -31,4 +31,4 @@ std::optional<std::filesystem::path> get_user_home_folder() {
 
   return std::nullopt;
 }
-} // end of namespace
+} // namespace aww

@@ -1,4 +1,4 @@
 BasedOnStyle: LLVM
 PointerAlignment: Left
 ReferenceAlignment: Left
-ColumnLimit: 100
+ColumnLimit: 150
