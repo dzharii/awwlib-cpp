@@ -30,7 +30,9 @@ function Invoke-ClangFormatAutofix {
         foreach ($file in $allFiles) {
             # Check if the file is inside the 'third-party' directory
 
-            $shoulkSkip = $file.FullName -like "*\third-party\*"
+            # split the path by the directory separator use .NET method
+            $directories = $file.FullName.Split([System.IO.Path]::DirectorySeparatorChar)
+            $shoulkSkip = $directories.Contains("third-party") -or $directories.Contains("build")
             if ($shoulkSkip) {
                 Write-Host "Skipping file: $($file.FullName)"
                 continue
