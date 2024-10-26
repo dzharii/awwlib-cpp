@@ -25,81 +25,101 @@ function Get-GitUnpushedChanges {
         throw "Git is not installed or not found in PATH."
     }
 
-    # Check if inside a Git repository
+    # Verify if the script is being run inside a Git repository
     try {
-        $isRepo = git rev-parse --is-inside-work-tree 2>$null
+        Write-Host "Checking if the current directory is a Git repository..."
+        $isRepo = git rev-parse --is-inside-work-tree 2>&1
         if ($isRepo -ne "true") {
             throw "Current directory is not a Git repository."
         }
     } catch {
-        throw "Current directory is not a Git repository."
+        throw "Failed to verify Git repository status: $($_.Exception.Message)"
+    }
+
+    # Fetch the latest commits from the remote to ensure up-to-date information
+    try {
+        Write-Host "Fetching latest commits from the remote repository..."
+        git fetch --quiet 2>&1
+    } catch {
+        throw "Failed to fetch updates from the remote repository."
     }
 
     # Get the current branch name
     try {
-        $currentBranch = git symbolic-ref --short HEAD
+        Write-Host "Determining the current branch name..."
+        $currentBranch = git symbolic-ref --short HEAD 2>&1
         if (-not $currentBranch) {
             throw "Unable to determine the current Git branch."
         }
     } catch {
-        throw "Unable to determine the current Git branch."
+        throw "Failed to retrieve the current Git branch name: $($_.Exception.Message)"
     }
 
     # Get the upstream branch
     try {
-        $upstream = git for-each-ref --format='%(upstream:short)' refs/heads/$currentBranch
-        if (-not $upstream) {
-            throw "No upstream branch set for '$currentBranch'. Please set an upstream branch."
+        Write-Host "Retrieving upstream branch for '$($currentBranch)'..."
+        $upstreamBranch = git rev-parse --abbrev-ref "$($currentBranch)@{upstream}" 2>&1
+        if (-not $upstreamBranch) {
+            throw "No upstream branch set for '$($currentBranch)'. Use 'git branch --set-upstream-to' to set an upstream branch."
         }
     } catch {
-        throw "Error retrieving the upstream branch for '$currentBranch'."
+        throw "Failed to retrieve the upstream branch for '$($currentBranch)': $($_.Exception.Message)"
     }
 
-    # Check if there are unpushed commits
+    # Use git cherry to find unpushed commits
     try {
-        $unpushedCommits = git log --oneline $upstream..$currentBranch
-        if (-not $unpushedCommits) {
-            $output += "No unpushed commits found. Your local branch '$currentBranch' is up to date with '$upstream'.`n"
+        Write-Host "Identifying unpushed commits on branch '$($currentBranch)'..."
+        $cherryOutput = git cherry -v $upstreamBranch $currentBranch 2>&1
+        if (-not $cherryOutput) {
+            $output += "No unpushed commits found. Local branch '$($currentBranch)' is up to date with '$($upstreamBranch)'.`n"
             return $output
         }
     } catch {
-        throw "Error retrieving unpushed commits."
+        throw "Failed to retrieve unpushed commits: $($_.Exception.Message)"
     }
 
-    $output += "Unpushed commits on branch '$currentBranch' compared to '$upstream':`n`n"
+    $output += "Unpushed commits on branch '$($currentBranch)' compared to '$($upstreamBranch)':`n`n"
 
-    # Split the commits into an array
-    $commitList = $unpushedCommits -split "`n"
+    # Process each line of the cherry output
+    $cherryLines = $cherryOutput -split "`n"
 
-    foreach ($commit in $commitList) {
-        # Extract commit hash and message
-        if ($commit -match "^([a-f0-9]{7,40})\s+(.*)$") {
-            $hash = $matches[1]
-            $message = $matches[2]
-        } else {
-            $hash = "Unknown"
-            $message = "No commit message available."
-        }
-
-        $output += "Commit: $hash - $message`n`n"
-
-        # Generate diff for the specific commit
-        try {
-            # Get the parent commit
-            $parent = git rev-parse "$hash^"
-
-            # Generate a diff including entire file (-U999999 for maximum context)
-            $diff = git diff $parent $hash -U999999 --color
-
-            if ($diff) {
-                $output += "Diff for commit $($hash):`n"
-                $output += "$diff`n"
-                $output += "`n"  # Add an empty line for readability
+    foreach ($line in $cherryLines) {
+        # Each line is prefixed with '+' (unpushed) or '-' (remote-only)
+        if ($line.StartsWith('+')) {
+            # Extract commit hash and message
+            if ($line -match '^\+\s+([a-f0-9]{7,40})\s+(.*)$') {
+                $commitHash = $matches[1]
+                $commitMessage = $matches[2]
             } else {
-                $output += "No changes detected in commit $hash.`n`n"
+                $commitHash = "Unknown"
+                $commitMessage = "No commit message available."
             }
-        } catch {
-            $output += "Unable to generate diff for commit $hash.`n`n"
+
+            $output += "Commit: $($commitHash) - $($commitMessage)`n`n"
+
+            # Generate diff for the specific commit
+            try {
+                Write-Host "Generating diff for commit $($commitHash)..."
+
+                # Get the parent commit for the diff
+                $parentCommit = git rev-parse "$($commitHash)^" 2>&1
+                if (-not $parentCommit) {
+                    throw "Failed to retrieve parent commit for $($commitHash)"
+                }
+
+                # Generate a diff including entire file (-U999999 for maximum context)
+                $diffOutput = git diff $parentCommit $commitHash -U999999 2>&1
+
+                if ($diffOutput) {
+                    $output += "Diff for commit $($commitHash):`n"
+                    $output += "$diffOutput`n"
+                    $output += "`n"  # Add an empty line for readability
+                } else {
+                    $output += "No changes detected in commit $($commitHash).`n`n"
+                }
+            } catch {
+                $output += "Unable to generate diff for commit $($commitHash): $($_.Exception.Message)`n`n"
+            }
         }
     }
 

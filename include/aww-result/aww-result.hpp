@@ -11,7 +11,7 @@ namespace aww {
 
 /**
  * @struct result_error
- * @brief Represents an error with a specific code and message.
+ * @brief Represents an error with a specific code and message. (aww tag #jyjhwmmy084)
  *
  * The `result_error` struct encapsulates error information, including an integer
  * error code and a descriptive error message. It provides accessor methods to
@@ -51,7 +51,7 @@ private:
 
 /**
  * @brief A template class representing a result that can either be a success (holding a value of type T)
- *        or an error (holding a ResultError).
+ *        or an error (holding a ResultError). (aww tag #8qnv7916n9k)
  */
 template <typename T> class result {
 public:
