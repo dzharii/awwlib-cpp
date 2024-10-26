@@ -6,6 +6,7 @@ set(TESTFILES        # All .cpp files in tests/
     dummy.cpp
     aww-string/aww-string-tests.cpp
     aww-os/aww-os.cpp
+    aww-result/aww-result.cpp
     #faudv6fbgzt
 )
 

@@ -63,6 +63,7 @@ set(SOURCES          # All .cpp files in src/
     src/example.cpp
     src/aww-string/aww-string.cpp
     src/aww-os/aww-os.cpp
+    src/aww-result/aww-result.cpp
     #ge0mh0v43gk
 )
 

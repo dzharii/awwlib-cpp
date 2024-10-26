@@ -18,6 +18,7 @@ $COMMAND_BUILD_RELEASE = "build-release"
 $COMMAND_BUILD_DEBUG = "build-debug"
 $COMMAND_GEN = "gen"
 $COMMAND_CLANG_FORMAT_AUTOFIX = "clang-format-autofix"
+$COMMAND_GET_GIT_UNPUSHED_CHANGES = "get-git-unpushed-changes"
 
 $HELP_MESSAGE = @"
 Usage:
@@ -45,6 +46,8 @@ Commands:
 
     $($COMMAND_CLANG_FORMAT_AUTOFIX):
         Automatically formats source code files using clang-format.
+    $($COMMAND_GET_GIT_UNPUSHED_CHANGES):
+        Get unpushed changes in the current branch.
 "@
 
 . $libPath/Get-Platform.ps1
@@ -52,6 +55,7 @@ Commands:
 . $libPath/Create-MDTREE.ps1
 . $libPath/Generate-Files.ps1
 . $libPath/Invoke-ClangFormatAutofix.ps1
+. $libPath/Get-GitUnpushedChanges.ps1
 
 
 switch ($Command.ToLower()) {
@@ -81,6 +85,11 @@ switch ($Command.ToLower()) {
 
     $COMMAND_CLANG_FORMAT_AUTOFIX {
         Invoke-ClangFormatAutofix
+    }
+
+    $COMMAND_GET_GIT_UNPUSHED_CHANGES {
+       Get-GitUnpushedChanges | Set-Clipboard
+       Write-Host "Unpushed changes copied to clipboard"
     }
 
     Default {

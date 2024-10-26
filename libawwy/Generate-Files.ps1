@@ -5,7 +5,7 @@ function Generate-Files {
     )
 
     # Validate file name
-    if ($FileName -match '[^a-zA-Z0-9]') {
+    if ($FileName -match '[^a-zA-Z0-9_-]') {
         Write-Error "Error: File name must contain only alphanumeric characters. Error in: '$($FileName)'"
         return
     }
