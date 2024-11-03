@@ -1,4 +1,3 @@
-#pragma once
 #ifndef AWW_RESULT_HPP
 #define AWW_RESULT_HPP
 

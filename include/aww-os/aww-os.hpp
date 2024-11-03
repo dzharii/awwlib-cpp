@@ -1,4 +1,3 @@
-#pragma once
 #ifndef AWW_OS_HPP
 #define AWW_OS_HPP
 

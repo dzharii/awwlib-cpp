@@ -37,7 +37,6 @@ function Generate-Files {
     # Generate file content in memory
     $cppIdentifier = Get-CppValidIdentifier -inputString $FileName
     $faContent = @"
-#pragma once
 #ifndef ${cppIdentifier}_HPP
 #define ${cppIdentifier}_HPP
 

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef AWW_STRING_HPP
 #define AWW_STRING_HPP
 
