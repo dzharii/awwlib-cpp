@@ -2,9 +2,9 @@
 
 tiny cleanup  -- remove `pragma once`
 
+add `erase_all_elements` this will be first integration with `awwtools` project
 
-
-
+this is the first integration with `awwlib`
 
 ## 2024-10-25
 
