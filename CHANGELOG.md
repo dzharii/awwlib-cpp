@@ -1,3 +1,17 @@
+## 2024-11-09 
+
+**Lua integration!** 
+
+Thank to the project: 
+
+2024-11-09 [marovira/lua: The Lua Programming Language with Modern CMake](https://github.com/marovira/lua/tree/master) { github.com }
+
+Lua is published under the MIT license and can be viewed [here](https://github.com/marovira/lua/blob/master/LUA_LICENSE). For more information, please see their official website [here](https://www.lua.org/).
+
+This bundle is published under the BSD-3 license can be viewed [here](https://github.com/marovira/lua/blob/master/LICENSE)
+
+
+
 ## 2024-11-03
 
 tiny cleanup  -- remove `pragma once`

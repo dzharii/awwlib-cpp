@@ -2,7 +2,22 @@ name: CI
 
 on:
   push:
+    branches: [ master ]
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - 'LUA_LICENSE'
+      - 'logo.png'
+      - 'doc/**'
   pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - 'LUA_LICENSE'
+      - 'logo.png'
+      - 'doc/**'
+  workflow_dispatch:
 
 jobs:
   build-and-test:
