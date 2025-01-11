@@ -4,6 +4,13 @@ Enhanced cross-platform CLI argument handling has been introduced with the addit
 
 
 
+- [x] 🚩TODO: move `utf16_to_utf8` to aww-string
+  - [x] Will keep it there, since it is for windows
+- [x] 🚩TODO: I guess I can add tests for `get_command_line_arguments` aww tag #w9e1s4uq1xt only on Linux, since on windows it uses winapi call inside
+  - [x] Also no, since it has a windows call
+
+
+
 ## 2024-11-09 
 
 **Lua integration!** 
