@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace aww {
 
@@ -41,6 +42,15 @@ std::filesystem::path get_current_executable_path();
  * @throws std::runtime_error if the home directory cannot be determined.
  */
 std::optional<std::filesystem::path> get_user_home_folder();
+
+/**
+ *  Retrieves the command line arguments passed to the program. (aww tag #w9e1s4uq1xt)
+ *  Important: The original first element (the program name) is not included in the returned vector.
+ *
+ *  @param argc The number of command line arguments (from main).
+ *  @param argv The array of command line arguments (from main).
+ */
+std::vector<std::string> get_command_line_arguments(int argc, char* argv[]);
 
 } // namespace aww
 #endif // AWW_OS_HPP

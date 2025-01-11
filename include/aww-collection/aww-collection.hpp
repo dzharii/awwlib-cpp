@@ -25,7 +25,7 @@ namespace aww {
  * @param value The value to remove from the vector.
  * @return `true` if one or more elements were erased; `false` otherwise.
  */
-template <typename T> bool erase_all_matched_elements(std::vector<T>& vec, const T& value) { return std::erase(vec, value) > 0; } // namespace aww
+template <typename T> bool erase_all_matched_elements(std::vector<T>& vec, const T& value) { return std::erase(vec, value) > 0; }
 
 } // namespace aww
 #endif // AWW_COLLECTION_HPP

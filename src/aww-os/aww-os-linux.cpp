@@ -31,4 +31,15 @@ std::optional<std::filesystem::path> get_user_home_folder() {
 
   return std::nullopt;
 }
+
+/**
+ * @brief Retrieves the command line arguments passed to the program. (aww tag #w9e1s4uq1xt). The original first element (the program name) is not
+ * included in the returned vector.
+ */
+std::vector<std::string> get_command_line_arguments(int argc, char* argv[]) {
+  std::vector<std::string> cmdArgs(argv, argv + argc);
+  cmdArgs.erase(cmdArgs.begin());
+  return cmdArgs;
+}
+
 } // namespace aww
