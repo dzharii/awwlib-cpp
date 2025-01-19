@@ -1,5 +1,3 @@
 #include "aww-value-objects/aww-value-objects.hpp"
 
-namespace aww {
-
-} // end of namespace
+namespace aww {} // namespace aww

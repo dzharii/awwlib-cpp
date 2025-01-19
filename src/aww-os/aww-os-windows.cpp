@@ -44,10 +44,11 @@ std::string utf16_to_utf8(const std::wstring& utf16) {
 }
 
 /**
- * @brief Retrieves the command line arguments passed to the program. (aww tag #w9e1s4uq1xt). The original first element (the program name) is not
- * included in the returned vector.
+ * @brief Retrieves the command line arguments passed to the program. (aww tag #w9e1s4uq1xt). The original first element
+ * (the program name) is not included in the returned vector.
  */
-std::vector<std::string> get_command_line_arguments([[maybe_unused]] int argc_unused, [[maybe_unused]] char* argv_unused[]) {
+std::vector<std::string> get_command_line_arguments([[maybe_unused]] int argc_unused,
+                                                    [[maybe_unused]] char* argv_unused[]) {
   // Get the wide command line string
   LPWSTR commandLine = GetCommandLineW();
 

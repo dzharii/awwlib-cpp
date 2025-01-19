@@ -9,11 +9,15 @@ struct CustomType {
   int id;
   std::string name;
 
-  bool operator==(const CustomType& other) const { return id == other.id && name == other.name; }
+  bool operator==(const CustomType& other) const {
+    return id == other.id && name == other.name;
+  }
 };
 
 // Helper function to create a default error
-aww::result_error make_default_error() { return aww::result_error(404, "Not Found"); }
+aww::result_error make_default_error() {
+  return aww::result_error(404, "Not Found");
+}
 
 TEST_SUITE("aww::result Tests") {
 

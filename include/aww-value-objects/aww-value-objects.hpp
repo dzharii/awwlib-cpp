@@ -32,7 +32,8 @@ protected:
    * Making this constructor protected prevents direct instantiation of
    * ValueObject<T>; users must subclass (or have a friend).
    */
-  explicit ValueObject(T value) : _value(std::move(value)) {}
+  explicit ValueObject(T value) : _value(std::move(value)) {
+  }
 
 public:
   /**
@@ -81,7 +82,9 @@ public:
    * @param other The other ValueObject to compare.
    * @return true if the wrapped values are equal, false otherwise.
    */
-  bool operator==(const ValueObject& other) const { return _value == other._value; }
+  bool operator==(const ValueObject& other) const {
+    return _value == other._value;
+  }
 
   /**
    * @brief Inequality operator for comparing two ValueObjects.
@@ -89,7 +92,9 @@ public:
    * @param other The other ValueObject to compare.
    * @return true if the wrapped values are not equal, false otherwise.
    */
-  bool operator!=(const ValueObject& other) const { return !(*this == other); }
+  bool operator!=(const ValueObject& other) const {
+    return !(*this == other);
+  }
 
   /**
    * @brief Provides read-only access to the wrapped value.

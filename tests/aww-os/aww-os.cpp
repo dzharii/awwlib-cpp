@@ -16,7 +16,8 @@
 namespace fs = std::filesystem;
 
 // Utility function to setup test environment
-void setup_environment_for_test_read_raw_configuration_file(const std::string& test_dir, const std::string& test_file, const std::string& content) {
+void setup_environment_for_test_read_raw_configuration_file(const std::string& test_dir, const std::string& test_file,
+                                                            const std::string& content) {
   fs::path exec_path = aww::get_current_executable_path();
   fs::path test_path = exec_path.parent_path() / test_dir;
 

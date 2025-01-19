@@ -35,7 +35,9 @@ TEST_CASE("erase_all_elements") {
   SUBCASE("removes all occurrences of a specified value from a vector of custom objects") {
     struct Custom {
       int id;
-      bool operator==(const Custom& other) const { return id == other.id; }
+      bool operator==(const Custom& other) const {
+        return id == other.id;
+      }
     };
 
     std::vector<Custom> vec = {{1}, {2}, {3}, {2}, {4}};
