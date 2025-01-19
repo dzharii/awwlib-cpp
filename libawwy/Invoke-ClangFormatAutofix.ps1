@@ -10,6 +10,10 @@ function Invoke-ClangFormatAutofix {
 
     .EXAMPLE
     Invoke-ClangFormatAutofix
+
+    .TODO
+    1. 2025-01-19 git ls-files return list of files in the repository that is not in .gitignore
+
     #>
 
     # Define the file extensions to process
@@ -32,7 +36,7 @@ function Invoke-ClangFormatAutofix {
 
             # split the path by the directory separator use .NET method
             $directories = $file.FullName.Split([System.IO.Path]::DirectorySeparatorChar)
-            $shoulkSkip = $directories.Contains("third-party") -or $directories.Contains("build")
+            $shoulkSkip = $directories.Contains("third-party") -or $directories.Contains("build") -or $directories.Contains("external")
             if ($shoulkSkip) {
                 Write-Host "Skipping file: $($file.FullName)"
                 continue
