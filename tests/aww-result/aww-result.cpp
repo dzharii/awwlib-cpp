@@ -26,7 +26,7 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Success Result Creation and Access") {
     SUBCASE("Create and access int value") {
-      aww::result<int> res = aww::result<int>::Ok(42);
+      aww::result<int> res = aww::result<int>::ok(42);
       CHECK(res.is_ok() == true);
       CHECK(res.is_err() == false);
       CHECK(static_cast<bool>(res) == true);
@@ -35,7 +35,7 @@ TEST_SUITE("aww::result Tests") {
 
     SUBCASE("Create and access std::string value") {
       std::string test_str = "Hello, World!";
-      aww::result<std::string> res = aww::result<std::string>::Ok(test_str);
+      aww::result<std::string> res = aww::result<std::string>::ok(test_str);
       CHECK(res.is_ok() == true);
       CHECK(res.is_err() == false);
       CHECK(static_cast<bool>(res) == true);
@@ -44,7 +44,7 @@ TEST_SUITE("aww::result Tests") {
 
     SUBCASE("Create and access CustomType value") {
       CustomType ct{1, "Test"};
-      aww::result<CustomType> res = aww::result<CustomType>::Ok(ct);
+      aww::result<CustomType> res = aww::result<CustomType>::ok(ct);
       CHECK(res.is_ok() == true);
       CHECK(res.is_err() == false);
       CHECK(static_cast<bool>(res) == true);
@@ -57,7 +57,7 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Error Result Creation and Access") {
     SUBCASE("Create and access error") {
-      aww::result<int> res = aww::result<int>::Err(aww::result_error(1001, "Invalid Input"));
+      aww::result<int> res = aww::result<int>::err(aww::result_error(1001, "Invalid Input"));
       CHECK(res.is_ok() == false);
       CHECK(res.is_err() == true);
       CHECK(static_cast<bool>(res) == false);
@@ -66,7 +66,7 @@ TEST_SUITE("aww::result Tests") {
     }
 
     SUBCASE("Create and access default error") {
-      aww::result<std::string> res = aww::result<std::string>::Err(make_default_error());
+      aww::result<std::string> res = aww::result<std::string>::err(make_default_error());
       CHECK(res.is_ok() == false);
       CHECK(res.is_err() == true);
       CHECK(static_cast<bool>(res) == false);
@@ -80,13 +80,13 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Exception Handling on Invalid Access") {
     SUBCASE("Access value from error result throws") {
-      aww::result<int> res = aww::result<int>::Err(aww::result_error(2002, "Operation Failed"));
+      aww::result<int> res = aww::result<int>::err(aww::result_error(2002, "Operation Failed"));
       CHECK_THROWS_AS(res.value(), std::runtime_error);
       CHECK_THROWS_WITH(res.value(), "Attempted to get value from an error result");
     }
 
     SUBCASE("Access error from success result throws") {
-      aww::result<int> res = aww::result<int>::Ok(7);
+      aww::result<int> res = aww::result<int>::ok(7);
       CHECK_THROWS_AS(res.error(), std::runtime_error);
       CHECK_THROWS_WITH(res.error(), "Attempted to get error from a success result");
     }
@@ -97,14 +97,14 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Move Semantics") {
     SUBCASE("Move a success result") {
-      aww::result<std::string> res1 = aww::result<std::string>::Ok("Move Test");
+      aww::result<std::string> res1 = aww::result<std::string>::ok("Move Test");
       aww::result<std::string> res2 = std::move(res1);
       CHECK(res2.is_ok() == true);
       CHECK(res2.value() == "Move Test");
     }
 
     SUBCASE("Move an error result") {
-      aww::result<int> res1 = aww::result<int>::Err(aww::result_error(3003, "Move Error"));
+      aww::result<int> res1 = aww::result<int>::err(aww::result_error(3003, "Move Error"));
       aww::result<int> res2 = std::move(res1);
       CHECK(res2.is_err() == true);
       CHECK(res2.error().error_code() == 3003);
@@ -117,14 +117,14 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Copy Semantics") {
     SUBCASE("Copy a success result") {
-      aww::result<int> res1 = aww::result<int>::Ok(55);
+      aww::result<int> res1 = aww::result<int>::ok(55);
       aww::result<int> res2 = res1;
       CHECK(res2.is_ok() == true);
       CHECK(res2.value() == 55);
     }
 
     SUBCASE("Copy an error result") {
-      aww::result<std::string> res1 = aww::result<std::string>::Err(aww::result_error(4004, "Copy Error"));
+      aww::result<std::string> res1 = aww::result<std::string>::err(aww::result_error(4004, "Copy Error"));
       aww::result<std::string> res2 = res1;
       CHECK(res2.is_err() == true);
       CHECK(res2.error().error_code() == 4004);
@@ -139,9 +139,9 @@ TEST_SUITE("aww::result Tests") {
     SUBCASE("Result with int") {
       auto ensure_even = [](int n) -> aww::result<int> {
         if (n % 2 == 0) {
-          return aww::result<int>::Ok(n);
+          return aww::result<int>::ok(n);
         } else {
-          return aww::result<int>::Err(aww::result_error(5005, "Number is not even"));
+          return aww::result<int>::err(aww::result_error(5005, "Number is not even"));
         }
       };
       auto res = ensure_even(10);
@@ -166,20 +166,20 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Different Type Parameters") {
     SUBCASE("Result with int") {
-      aww::result<int> res = aww::result<int>::Ok(10);
+      aww::result<int> res = aww::result<int>::ok(10);
       CHECK(res.is_ok() == true);
       CHECK(res.value() == 10);
     }
 
     SUBCASE("Result with std::string") {
-      aww::result<std::string> res = aww::result<std::string>::Ok("String Test");
+      aww::result<std::string> res = aww::result<std::string>::ok("String Test");
       CHECK(res.is_ok() == true);
       CHECK(res.value() == "String Test");
     }
 
     SUBCASE("Result with CustomType") {
       CustomType ct{2, "Custom"};
-      aww::result<CustomType> res = aww::result<CustomType>::Ok(ct);
+      aww::result<CustomType> res = aww::result<CustomType>::ok(ct);
       CHECK(res.is_ok() == true);
       CHECK(res.value() == ct);
     }
@@ -190,7 +190,7 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Edge Cases") {
     SUBCASE("Empty error message") {
-      aww::result<int> res = aww::result<int>::Err(aww::result_error(5005, ""));
+      aww::result<int> res = aww::result<int>::err(aww::result_error(5005, ""));
       CHECK(res.is_err() == true);
       CHECK(res.error().error_code() == 5005);
       CHECK(res.error().error_message().empty() == true);
@@ -198,13 +198,13 @@ TEST_SUITE("aww::result Tests") {
 
     SUBCASE("Large value") {
       long long large_value = 1LL << 60;
-      aww::result<long long> res = aww::result<long long>::Ok(large_value);
+      aww::result<long long> res = aww::result<long long>::ok(large_value);
       CHECK(res.is_ok() == true);
       CHECK(res.value() == large_value);
     }
 
     SUBCASE("Zero value") {
-      aww::result<int> res = aww::result<int>::Ok(0);
+      aww::result<int> res = aww::result<int>::ok(0);
       CHECK(res.is_ok() == true);
       CHECK(res.value() == 0);
     }
@@ -215,13 +215,13 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Factory Methods") {
     SUBCASE("Ok factory method") {
-      aww::result<double> res = aww::result<double>::Ok(3.1415);
+      aww::result<double> res = aww::result<double>::ok(3.1415);
       CHECK(res.is_ok() == true);
       CHECK(res.value() == doctest::Approx(3.1415));
     }
 
     SUBCASE("Err factory method") {
-      aww::result<double> res = aww::result<double>::Err(aww::result_error(6006, "Factory Error"));
+      aww::result<double> res = aww::result<double>::err(aww::result_error(6006, "Factory Error"));
       CHECK(res.is_err() == true);
       CHECK(res.error().error_code() == 6006);
       CHECK(res.error().error_message() == "Factory Error");

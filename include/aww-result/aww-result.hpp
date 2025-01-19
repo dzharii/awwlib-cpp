@@ -27,7 +27,7 @@ public:
    * @param code The integer representing the error code.
    * @param message The descriptive message associated with the error.
    */
-  result_error(int code, std::string message) : code_(code), message_(std::move(message)) {
+  result_error(int code, std::string message) : m_code(code), m_message(std::move(message)) {
   }
 
   /**
@@ -36,7 +36,7 @@ public:
    * @return An integer representing the error code.
    */
   int error_code() const noexcept {
-    return code_;
+    return m_code;
   }
 
   /**
@@ -45,12 +45,12 @@ public:
    * @return A constant reference to the `std::string` containing the error message.
    */
   const std::string& error_message() const noexcept {
-    return message_;
+    return m_message;
   }
 
 private:
-  int code_;            /**< The integer error code. */
-  std::string message_; /**< The descriptive error message. */
+  int m_code;            /**< The integer error code. */
+  std::string m_message; /**< The descriptive error message. */
 };
 
 /**
@@ -64,7 +64,7 @@ public:
    * @param value The value to store in the Result.
    * @return A Result object representing success.
    */
-  static result Ok(T value) {
+  static result ok(T value) {
     return result(std::move(value));
   }
 
@@ -73,13 +73,13 @@ public:
    * @param error The ResultError to store in the Result.
    * @return A Result object representing an error.
    */
-  static result Err(result_error error) {
+  static result err(result_error error) {
     return result(std::move(error));
   }
 
   // Check if the result is success
   bool is_ok() const noexcept {
-    return std::holds_alternative<T>(result_);
+    return std::holds_alternative<T>(m_result);
   }
 
   // Check if the result is an error
@@ -95,7 +95,7 @@ public:
   // Get the value by const reference
   const T& value() const& {
     if (is_ok()) {
-      return std::get<T>(result_);
+      return std::get<T>(m_result);
     }
     throw std::runtime_error("Attempted to get value from an error result");
   }
@@ -103,7 +103,7 @@ public:
   // Get the value by rvalue reference (allows moving)
   T&& value() && {
     if (is_ok()) {
-      return std::move(std::get<T>(result_));
+      return std::move(std::get<T>(m_result));
     }
     throw std::runtime_error("Attempted to get value from an error result");
   }
@@ -111,7 +111,7 @@ public:
   // Get the error by const reference
   const result_error& error() const& {
     if (is_err()) {
-      return std::get<result_error>(result_);
+      return std::get<result_error>(m_result);
     }
     throw std::runtime_error("Attempted to get error from a success result");
   }
@@ -119,19 +119,19 @@ public:
   // Get the error by rvalue reference (allows moving)
   result_error&& error() && {
     if (is_err()) {
-      return std::move(std::get<result_error>(result_));
+      return std::move(std::get<result_error>(m_result));
     }
     throw std::runtime_error("Attempted to get error from a success result");
   }
 
 private:
   // Private constructors to enforce the use of factory methods
-  explicit result(T value) : result_(std::move(value)) {
+  explicit result(T value) : m_result(std::move(value)) {
   }
-  explicit result(result_error error) : result_(std::move(error)) {
+  explicit result(result_error error) : m_result(std::move(error)) {
   }
 
-  std::variant<T, result_error> result_;
+  std::variant<T, result_error> m_result;
 };
 
 } // namespace aww

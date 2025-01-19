@@ -6,7 +6,7 @@
 
 namespace aww {
 /**
- * @brief Abstract base class (DDD Value Object) that wraps a single primitive type T.
+ * @brief Abstract base class (DDD Value Object) that wraps a single primitive type T. (aww tag #bw9ercgm8cf)
  *
  * Characteristics:
  *  - No default construction: must be given a value on creation.
@@ -16,23 +16,23 @@ namespace aww {
  *
  * @tparam T The primitive type being wrapped (e.g., int, double, etc.).
  */
-template <typename T> class ValueObject {
+template <typename T> class value_object {
 private:
   /**
    * @brief The single wrapped primitive value.
    */
-  T _value;
+  T m_value;
 
 protected:
   /**
-   * @brief Construct a ValueObject with a given primitive value.
+   * @brief Construct a value_object with a given primitive value.
    *
    * @param value The primitive value to store.
    *
    * Making this constructor protected prevents direct instantiation of
-   * ValueObject<T>; users must subclass (or have a friend).
+   * value_object<T>; users must subclass (or have a friend).
    */
-  explicit ValueObject(T value) : _value(std::move(value)) {
+  explicit value_object(T value) : m_value(std::move(value)) {
   }
 
 public:
@@ -41,58 +41,58 @@ public:
    *
    * Making it virtual allows safe polymorphic usage of subclasses.
    */
-  virtual ~ValueObject() = default;
+  virtual ~value_object() = default;
 
   /**
-   * @brief Delete the default constructor to avoid creating a ValueObject<T> with no value.
+   * @brief Delete the default constructor to avoid creating a value_object<T> with no value.
    */
-  ValueObject() = delete;
+  value_object() = delete;
 
   /**
    * @brief Default copy constructor (freely copyable).
    */
-  ValueObject(const ValueObject&) = default;
+  value_object(const value_object&) = default;
 
   /**
    * @brief Default move constructor (noexcept for potential performance benefits).
    */
-  ValueObject(ValueObject&&) noexcept = default;
+  value_object(value_object&&) noexcept = default;
 
   /**
    * @brief Default copy assignment (overwrites with the other object's value).
    */
-  ValueObject& operator=(const ValueObject&) = default;
+  value_object& operator=(const value_object&) = default;
 
   /**
    * @brief Default move assignment (noexcept for potential performance benefits).
    */
-  ValueObject& operator=(ValueObject&&) noexcept = default;
+  value_object& operator=(value_object&&) noexcept = default;
 
   /**
    * @brief Spaceship operator provides all comparison operators by default.
    *
-   * @param other Another ValueObject to compare against.
+   * @param other Another value_object to compare against.
    * @return The result of comparing the wrapped values with <=>.
    */
-  auto operator<=>(const ValueObject& other) const = default;
+  auto operator<=>(const value_object& other) const = default;
 
   /**
    * @brief Equality operator for comparing two ValueObjects.
    *
-   * @param other The other ValueObject to compare.
+   * @param other The other value_object to compare.
    * @return true if the wrapped values are equal, false otherwise.
    */
-  bool operator==(const ValueObject& other) const {
-    return _value == other._value;
+  bool operator==(const value_object& other) const {
+    return m_value == other.m_value;
   }
 
   /**
    * @brief Inequality operator for comparing two ValueObjects.
    *
-   * @param other The other ValueObject to compare.
+   * @param other The other value_object to compare.
    * @return true if the wrapped values are not equal, false otherwise.
    */
-  bool operator!=(const ValueObject& other) const {
+  bool operator!=(const value_object& other) const {
     return !(*this == other);
   }
 
@@ -103,19 +103,19 @@ public:
    */
   [[nodiscard]]
   const T& value() const noexcept {
-    return _value;
+    return m_value;
   }
 };
 
 /**
  * Example usage:
  *
- * // A specialized ValueObject that wraps 'int':
- * class NonNegativeInt : public ValueObject<int>
+ * // A specialized value_object that wraps 'int':
+ * class NonNegativeInt : public value_object<int>
  * {
  * public:
  *     explicit NonNegativeInt(int val)
- *         : ValueObject<int>(val)
+ *         : value_object<int>(val)
  *     {
  *         if (val < 0)
  *         {

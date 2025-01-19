@@ -10,78 +10,78 @@ namespace aww {
 // Example specialized ValueObjects for testing
 
 /**
- * @brief NonNegativeInt Value Object: ensures an integer is non-negative.
+ * @brief non_negative_int Value Object: ensures an integer is non-negative.
  */
-class NonNegativeInt : public ValueObject<int> {
+class non_negative_int : public value_object<int> {
 public:
-  explicit NonNegativeInt(int val) : ValueObject<int>(val) {
+  explicit non_negative_int(int val) : value_object<int>(val) {
     if (val < 0) {
-      throw std::invalid_argument("NonNegativeInt must not be negative");
+      throw std::invalid_argument("non_negative_int must not be negative");
     }
   }
 };
 
 /**
- * @brief EmailAddress Value Object: ensures a string contains '@'.
+ * @brief email_address Value Object: ensures a string contains '@'.
  */
-class EmailAddress : public ValueObject<std::string> {
+class email_address : public value_object<std::string> {
 public:
-  explicit EmailAddress(const std::string& val) : ValueObject<std::string>(val) {
+  explicit email_address(const std::string& val) : value_object<std::string>(val) {
     if (val.find('@') == std::string::npos) {
-      throw std::invalid_argument("EmailAddress must contain '@'");
+      throw std::invalid_argument("email_address must contain '@'");
     }
   }
 };
 
 /**
- * @brief USAddress Value Object: ensures all address fields are non-empty.
+ * @brief us_address Value Object: ensures all address fields are non-empty.
  */
-struct USAddressFields {
-  std::string Street;
-  std::string City;
-  std::string State;
-  std::string ZipCode;
+struct us_address_fields {
+  std::string street;
+  std::string city;
+  std::string state;
+  std::string zip_code;
 
-  bool operator==(const USAddressFields& other) const = default;
-  auto operator<=>(const USAddressFields& other) const = default;
+  bool operator==(const us_address_fields& other) const = default;
+  auto operator<=>(const us_address_fields& other) const = default;
 };
 
-class USAddress : public ValueObject<USAddressFields> {
+class us_address : public value_object<us_address_fields> {
 public:
-  explicit USAddress(const USAddressFields& fields) : ValueObject<USAddressFields>(fields) {
-    if (fields.Street.empty()) {
-      throw std::invalid_argument("Street field must not be empty");
+  explicit us_address(const us_address_fields& fields) : value_object<us_address_fields>(fields) {
+    if (fields.street.empty()) {
+      throw std::invalid_argument("street field must not be empty");
     }
-    if (fields.City.empty()) {
-      throw std::invalid_argument("City field must not be empty");
+    if (fields.city.empty()) {
+      throw std::invalid_argument("city field must not be empty");
     }
-    if (fields.State.empty()) {
-      throw std::invalid_argument("State field must not be empty");
+    if (fields.state.empty()) {
+      throw std::invalid_argument("state field must not be empty");
     }
-    if (fields.ZipCode.empty()) {
-      throw std::invalid_argument("ZipCode field must not be empty");
+    if (fields.zip_code.empty()) {
+      throw std::invalid_argument("zip_code field must not be empty");
     }
   }
 };
 
 } // namespace aww
 
-TEST_CASE("ValueObject<T> usage examples and behavior specifications") {
+TEST_CASE("value_object<T> usage examples and behavior specifications") {
   using namespace aww;
 
   SUBCASE("Construction and immutability") {
-    NonNegativeInt validInt(10);
+    non_negative_int validInt(10);
     CHECK(validInt.value() == 10);
 
     // Invalid construction
-    CHECK_THROWS_AS(NonNegativeInt(-5), std::invalid_argument);
-    CHECK_THROWS_WITH(NonNegativeInt(-5), "NonNegativeInt must not be negative");
+    CHECK_THROWS_AS(non_negative_int(-5), std::invalid_argument);
+    CHECK_THROWS_WITH(non_negative_int(-5), "non_negative_int must not be negative");
   }
 
   SUBCASE("Equality and ordering") {
-    NonNegativeInt a(5);
-    NonNegativeInt b(5);
-    NonNegativeInt c(10);
+    non_negative_int a(5);
+    non_negative_int b(5);
+    non_negative_int c(10);
 
     // Equality
 
@@ -95,26 +95,26 @@ TEST_CASE("ValueObject<T> usage examples and behavior specifications") {
     CHECK(c >= b);
   }
 
-  SUBCASE("Subclass with custom validation (EmailAddress)") {
-    EmailAddress email("user@example.com");
+  SUBCASE("Subclass with custom validation (email_address)") {
+    email_address email("user@example.com");
     CHECK(email.value() == "user@example.com");
 
     // Invalid construction
-    CHECK_THROWS_AS(EmailAddress("invalid-email"), std::invalid_argument);
-    CHECK_THROWS_WITH(EmailAddress("invalid-email"), "EmailAddress must contain '@'");
+    CHECK_THROWS_AS(email_address("invalid-email"), std::invalid_argument);
+    CHECK_THROWS_WITH(email_address("invalid-email"), "email_address must contain '@'");
 
-    // Equality for EmailAddress
-    EmailAddress email1("user@example.com");
-    EmailAddress email2("user@example.com");
-    EmailAddress email3("admin@example.com");
+    // Equality for email_address
+    email_address email1("user@example.com");
+    email_address email2("user@example.com");
+    email_address email3("admin@example.com");
     CHECK(email1 == email2);
     CHECK(email1 != email3);
   }
 
   SUBCASE("Copy and move semantics") {
-    NonNegativeInt original(42);
-    NonNegativeInt copy = original;
-    NonNegativeInt moved = std::move(original);
+    non_negative_int original(42);
+    non_negative_int copy = original;
+    non_negative_int moved = std::move(original);
 
     // Copy preserves the same value
     CHECK(copy.value() == 42);
@@ -124,17 +124,17 @@ TEST_CASE("ValueObject<T> usage examples and behavior specifications") {
   }
 
   SUBCASE("Combining value objects in operations") {
-    NonNegativeInt a(3);
-    NonNegativeInt b(7);
+    non_negative_int a(3);
+    non_negative_int b(7);
 
     // Demonstrate creating a new object as a result of an operation
-    NonNegativeInt sum(a.value() + b.value());
+    non_negative_int sum(a.value() + b.value());
     CHECK(sum.value() == 10);
   }
 
   SUBCASE("Using value objects in standard containers") {
     // Ensure that STL containers work with ValueObjects
-    std::vector<NonNegativeInt> numbers = {NonNegativeInt(3), NonNegativeInt(1), NonNegativeInt(2)};
+    std::vector<non_negative_int> numbers = {non_negative_int(3), non_negative_int(1), non_negative_int(2)};
     CHECK(numbers.size() == 3);
 
     // Accessing elements
@@ -149,24 +149,24 @@ TEST_CASE("ValueObject<T> usage examples and behavior specifications") {
     CHECK(numbers[2].value() == 3);
   }
 
-  SUBCASE("USAddress with validation") {
-    USAddress validAddress({"123 Main St", "Springfield", "IL", "62704"});
+  SUBCASE("us_address with validation") {
+    us_address validAddress({"123 Main St", "Springfield", "IL", "62704"});
 
-    CHECK(validAddress.value().Street == "123 Main St");
-    CHECK(validAddress.value().City == "Springfield");
-    CHECK(validAddress.value().State == "IL");
-    CHECK(validAddress.value().ZipCode == "62704");
+    CHECK(validAddress.value().street == "123 Main St");
+    CHECK(validAddress.value().city == "Springfield");
+    CHECK(validAddress.value().state == "IL");
+    CHECK(validAddress.value().zip_code == "62704");
 
     // Invalid construction: specific field validation
-    CHECK_THROWS_WITH(USAddress({"", "Springfield", "IL", "62704"}), "Street field must not be empty");
-    CHECK_THROWS_WITH(USAddress({"123 Main St", "", "IL", "62704"}), "City field must not be empty");
-    CHECK_THROWS_WITH(USAddress({"123 Main St", "Springfield", "", "62704"}), "State field must not be empty");
-    CHECK_THROWS_WITH(USAddress({"123 Main St", "Springfield", "IL", ""}), "ZipCode field must not be empty");
+    CHECK_THROWS_WITH(us_address({"", "Springfield", "IL", "62704"}), "street field must not be empty");
+    CHECK_THROWS_WITH(us_address({"123 Main St", "", "IL", "62704"}), "city field must not be empty");
+    CHECK_THROWS_WITH(us_address({"123 Main St", "Springfield", "", "62704"}), "state field must not be empty");
+    CHECK_THROWS_WITH(us_address({"123 Main St", "Springfield", "IL", ""}), "zip_code field must not be empty");
 
     // Equality
-    USAddress address1({"123 Main St", "Springfield", "IL", "62704"});
-    USAddress address2({"123 Main St", "Springfield", "IL", "62704"});
-    USAddress address3({"456 Elm St", "Springfield", "IL", "62704"});
+    us_address address1({"123 Main St", "Springfield", "IL", "62704"});
+    us_address address2({"123 Main St", "Springfield", "IL", "62704"});
+    us_address address3({"456 Elm St", "Springfield", "IL", "62704"});
 
     CHECK(address1 == address2);
     CHECK(address1 != address3);
