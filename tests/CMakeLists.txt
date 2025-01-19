@@ -8,6 +8,7 @@ set(TESTFILES        # All .cpp files in tests/
     aww-os/aww-os.cpp
     aww-result/aww-result.cpp
     aww-collection/aww-collection.cpp
+    aww-value-objects/aww-value-objects.cpp
     #faudv6fbgzt
 )
 
