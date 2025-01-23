@@ -1,5 +1,21 @@
 # AwwLib Changelog
 
+
+
+## 2025-01-22 
+
+Refactoring.
+
+**`result_error` Struct Simplification**:
+The `result_error` struct was updated to remove the `error_code` field. This revision narrows its scope to handling descriptive error messages, making the structure more concise and specialized.
+
+**Test File Naming Update**:
+A minor change was made to the `Generate-Files.ps1` script to rename generated test files. Test files now include the `-tests` suffix (e.g., `example-tests.cpp`) for clearer identification.
+
+`awwy gen` now creates test files with `-tests` prefix; example: `aww-string-tests.cpp`
+
+
+
 ## 2025-01-18
 
 **Value Objects** in `include\aww-value-objects\aww-value-objects.hpp`

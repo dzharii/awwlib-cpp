@@ -10,33 +10,21 @@ namespace aww {
 
 /**
  * @struct result_error
- * @brief Represents an error with a specific code and message. (aww tag #jyjhwmmy084)
+ * @brief Represents an error with a specific message. (aww tag #jyjhwmmy084)
  *
- * The `result_error` struct encapsulates error information, including an integer
- * error code and a descriptive error message. It provides accessor methods to
- * retrieve these details.
+ * The `result_error` struct encapsulates error information, including a descriptive error message.
+ * It provides accessor methods to retrieve these details.
  */
 struct result_error {
 public:
   /**
-   * @brief Constructs a `result_error` with the specified code and message.
+   * @brief Constructs a `result_error` with the specified message.
    *
-   * Initializes the error code and error message by moving the provided
-   * `std::string` to avoid unnecessary copying.
+   * Initializes the error message by moving the provided `std::string` to avoid unnecessary copying.
    *
-   * @param code The integer representing the error code.
    * @param message The descriptive message associated with the error.
    */
-  result_error(int code, std::string message) : m_code(code), m_message(std::move(message)) {
-  }
-
-  /**
-   * @brief Retrieves the error code.
-   *
-   * @return An integer representing the error code.
-   */
-  int error_code() const noexcept {
-    return m_code;
+  result_error(std::string message) : m_message(std::move(message)) {
   }
 
   /**
@@ -49,7 +37,6 @@ public:
   }
 
 private:
-  int m_code;            /**< The integer error code. */
   std::string m_message; /**< The descriptive error message. */
 };
 

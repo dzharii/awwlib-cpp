@@ -16,7 +16,7 @@ struct CustomType {
 
 // Helper function to create a default error
 aww::result_error make_default_error() {
-  return aww::result_error(404, "Not Found");
+  return aww::result_error("Not Found");
 }
 
 TEST_SUITE("aww::result Tests") {
@@ -57,11 +57,10 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Error Result Creation and Access") {
     SUBCASE("Create and access error") {
-      aww::result<int> res = aww::result<int>::err(aww::result_error(1001, "Invalid Input"));
+      aww::result<int> res = aww::result<int>::err(aww::result_error("Invalid Input"));
       CHECK(res.is_ok() == false);
       CHECK(res.is_err() == true);
       CHECK(static_cast<bool>(res) == false);
-      CHECK(res.error().error_code() == 1001);
       CHECK(res.error().error_message() == "Invalid Input");
     }
 
@@ -70,7 +69,6 @@ TEST_SUITE("aww::result Tests") {
       CHECK(res.is_ok() == false);
       CHECK(res.is_err() == true);
       CHECK(static_cast<bool>(res) == false);
-      CHECK(res.error().error_code() == 404);
       CHECK(res.error().error_message() == "Not Found");
     }
   }
@@ -80,7 +78,7 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Exception Handling on Invalid Access") {
     SUBCASE("Access value from error result throws") {
-      aww::result<int> res = aww::result<int>::err(aww::result_error(2002, "Operation Failed"));
+      aww::result<int> res = aww::result<int>::err(aww::result_error("Operation Failed"));
       CHECK_THROWS_AS(res.value(), std::runtime_error);
       CHECK_THROWS_WITH(res.value(), "Attempted to get value from an error result");
     }
@@ -104,10 +102,9 @@ TEST_SUITE("aww::result Tests") {
     }
 
     SUBCASE("Move an error result") {
-      aww::result<int> res1 = aww::result<int>::err(aww::result_error(3003, "Move Error"));
+      aww::result<int> res1 = aww::result<int>::err(aww::result_error("Move Error"));
       aww::result<int> res2 = std::move(res1);
       CHECK(res2.is_err() == true);
-      CHECK(res2.error().error_code() == 3003);
       CHECK(res2.error().error_message() == "Move Error");
     }
   }
@@ -124,10 +121,9 @@ TEST_SUITE("aww::result Tests") {
     }
 
     SUBCASE("Copy an error result") {
-      aww::result<std::string> res1 = aww::result<std::string>::err(aww::result_error(4004, "Copy Error"));
+      aww::result<std::string> res1 = aww::result<std::string>::err(aww::result_error("Copy Error"));
       aww::result<std::string> res2 = res1;
       CHECK(res2.is_err() == true);
-      CHECK(res2.error().error_code() == 4004);
       CHECK(res2.error().error_message() == "Copy Error");
     }
   }
@@ -141,7 +137,7 @@ TEST_SUITE("aww::result Tests") {
         if (n % 2 == 0) {
           return aww::result<int>::ok(n);
         } else {
-          return aww::result<int>::err(aww::result_error(5005, "Number is not even"));
+          return aww::result<int>::err(aww::result_error("Number is not even"));
         }
       };
       auto res = ensure_even(10);
@@ -153,7 +149,6 @@ TEST_SUITE("aww::result Tests") {
 
       res = ensure_even(7);
       if (not res) {
-        CHECK(res.error().error_code() == 5005);
         CHECK(res.error().error_message() == "Number is not even");
       } else {
         FAIL("Result is_even(7) should be Err");
@@ -190,9 +185,8 @@ TEST_SUITE("aww::result Tests") {
   // ----------------------------
   TEST_CASE("Edge Cases") {
     SUBCASE("Empty error message") {
-      aww::result<int> res = aww::result<int>::err(aww::result_error(5005, ""));
+      aww::result<int> res = aww::result<int>::err(aww::result_error(""));
       CHECK(res.is_err() == true);
-      CHECK(res.error().error_code() == 5005);
       CHECK(res.error().error_message().empty() == true);
     }
 
@@ -221,9 +215,8 @@ TEST_SUITE("aww::result Tests") {
     }
 
     SUBCASE("Err factory method") {
-      aww::result<double> res = aww::result<double>::err(aww::result_error(6006, "Factory Error"));
+      aww::result<double> res = aww::result<double>::err(aww::result_error("Factory Error"));
       CHECK(res.is_err() == true);
-      CHECK(res.error().error_code() == 6006);
       CHECK(res.error().error_message() == "Factory Error");
     }
   }

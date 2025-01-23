@@ -16,7 +16,7 @@ function Generate-Files {
     # Define file paths to be generated
     $faPath = "include\$($FileName)\$($FileName).hpp"
     $fbPath = "src\$($FileName)\$($FileName).cpp"
-    $fcPath = "tests\$($FileName)\$($FileName).cpp"
+    $fcPath = "tests\$($FileName)\$($FileName)-tests.cpp"
 
     function Get-CppValidIdentifier {
         param (
