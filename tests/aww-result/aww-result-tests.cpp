@@ -71,6 +71,25 @@ TEST_SUITE("aww::result Tests") {
       CHECK(static_cast<bool>(res) == false);
       CHECK(res.error().error_message() == "Not Found");
     }
+    SUBCASE("Create and access error with std::string") {
+      aww::result<int> res = aww::result<int>::err(std::string("String Error"));
+      CHECK(res.is_ok() == false);
+      CHECK(res.is_err() == true);
+      CHECK(static_cast<bool>(res) == false);
+      CHECK(res.error().error_message() == "String Error");
+    }
+
+    SUBCASE("Create and access error with std::exception") {
+      try {
+        throw std::runtime_error("Exception Error");
+      } catch (const std::exception& e) {
+        aww::result<int> res = aww::result<int>::err(e);
+        CHECK(res.is_ok() == false);
+        CHECK(res.is_err() == true);
+        CHECK(static_cast<bool>(res) == false);
+        CHECK(res.error().error_message() == "Exception Error");
+      }
+    }
   }
 
   // ----------------------------

@@ -1,6 +1,7 @@
 #ifndef AWW_RESULT_HPP
 #define AWW_RESULT_HPP
 
+#include <exception>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -62,6 +63,24 @@ public:
    */
   static result err(result_error error) {
     return result(std::move(error));
+  }
+
+  /**
+   * @brief Creates an error Result containing the provided error message.
+   * @param error The error message to store in the Result.
+   * @return A Result object representing an error.
+   */
+  static result err(std::string error) {
+    return result(result_error(std::move(error)));
+  }
+
+  /**
+   * @brief Creates an error Result containing the provided exception.
+   * @param error The exception to store in the Result.
+   * @return A Result object representing an error.
+   */
+  static result err(const std::exception& error) {
+    return result(result_error(error.what()));
   }
 
   // Check if the result is success
