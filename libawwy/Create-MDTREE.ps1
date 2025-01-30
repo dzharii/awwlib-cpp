@@ -10,7 +10,7 @@ function Create-MDTREE {
     $outputFile = "2024-04-21-mdtree-output.md"
     $outputFilePath = Join-Path -Path $ThisScriptFolderPath -ChildPath $outputFile
     $cppExtensions = @("*.h", "*.hpp", "*.c", "*.cpp", "*.cxx")
-    $folders = @("app", "include", "src", "tests")
+    $allowedFolders = @("include", "src")  # Only scan these folders
 
     $markdown = ""
     $markdown += "# MDTREE ($($outputFile))`n`n"
@@ -18,8 +18,13 @@ function Create-MDTREE {
     $markdown += "This document contains the content of all C++ files in the current project. `n`n"
     $markdown += "[[_TOC_]]`n`n"
 
-    foreach ($folder in $folders) {
+    foreach ($folder in $allowedFolders) {
         $path = Join-Path -Path $ThisScriptFolderPath -ChildPath $folder
+        if (-not (Test-Path $path)) {
+            Write-Host "Skipping non-existent folder: $($folder)" -ForegroundColor Yellow
+            continue
+        }
+        
         $files = Get-ChildItem -Path $path -Include $cppExtensions -Recurse
 
         foreach ($file in $files) {
@@ -30,7 +35,7 @@ function Create-MDTREE {
                 }
             }
             $fileContent = Get-Content $file.FullName -Raw
-            $relativePath = $file.FullName.Replace($ThisScriptFolderPath + '\', '')
+            $relativePath = $file.FullName.Replace($ThisScriptFolderPath + '\\', '')
 
             $markdown += "## **$($relativePath)**:`n`n"
             $markdown += "$($tripleBacktick)cpp`n$($fileContent)`n$($tripleBacktick)`n`n"
