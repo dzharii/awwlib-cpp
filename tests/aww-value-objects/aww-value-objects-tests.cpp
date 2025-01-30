@@ -172,3 +172,59 @@ TEST_CASE("value_object<T> usage examples and behavior specifications") {
     CHECK(address1 != address3);
   }
 }
+
+TEST_CASE("value_object<T> goes out of scope") {
+  using namespace aww;
+
+  SUBCASE("Primitive type as T") {
+    int primitive_value;
+    {
+      non_negative_int obj(42);
+      primitive_value = obj.value();
+      CHECK(primitive_value == 42);
+    } // obj goes out of scope here
+    CHECK(primitive_value == 42);
+  }
+
+  SUBCASE("Vector as T") {
+    std::vector<int> vector_value;
+    class vector_wrapper : public value_object<std::vector<int>> {
+    public:
+      explicit vector_wrapper(const std::vector<int>& val) : value_object<std::vector<int>>(val) {
+      }
+    };
+
+    {
+      vector_wrapper obj({1, 2, 3});
+      vector_value = obj.value();
+      CHECK(vector_value == std::vector<int>({1, 2, 3}));
+    } // obj goes out of scope here
+    CHECK(vector_value == std::vector<int>({1, 2, 3}));
+  }
+
+  SUBCASE("String as T") {
+    std::string string_value;
+    {
+      email_address obj("user@example.com");
+      string_value = obj.value();
+      CHECK(string_value == "user@example.com");
+    } // obj goes out of scope here
+    CHECK(string_value == "user@example.com");
+  }
+
+  SUBCASE("Struct as T") {
+    us_address_fields struct_value;
+    {
+      us_address obj({"123 Main St", "Springfield", "IL", "62704"});
+      struct_value = obj.value();
+      CHECK(struct_value.street == "123 Main St");
+      CHECK(struct_value.city == "Springfield");
+      CHECK(struct_value.state == "IL");
+      CHECK(struct_value.zip_code == "62704");
+    } // obj goes out of scope here
+    CHECK(struct_value.street == "123 Main St");
+    CHECK(struct_value.city == "Springfield");
+    CHECK(struct_value.state == "IL");
+    CHECK(struct_value.zip_code == "62704");
+  }
+}

@@ -14,7 +14,10 @@ namespace aww {
  *  - Equality & ordering: defined purely by the wrapped value (no identity).
  *  - Virtual destructor: suitable for subclassing.
  *
- * @tparam T The primitive type being wrapped (e.g., int, double, etc.).
+ * @tparam T The "primitive" type being wrapped (e.g., int, double, std::string, std::vector, struct, etc.).
+ *
+ * @note Precondition: T should be a value type such as primitive types, strings, arrays, or structs.
+ *       It does not make sense to store pointers, classes, or other complex types as value objects.
  */
 template <typename T> class value_object {
 private:
