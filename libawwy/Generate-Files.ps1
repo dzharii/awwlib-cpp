@@ -125,7 +125,7 @@ TEST_CASE("testcase template 1") {
     Set-ContentLineBeforeMarker -filePath $cmakeListPath -marker "#ge0mh0v43gk" -lineToInsert "    src/$($FileName)/$($FileName).cpp"
 
     # Update tests CMakeLists.txt
-    Set-ContentLineBeforeMarker -filePath $testsCmakeListPath -marker "#faudv6fbgzt" -lineToInsert "    $($FileName)/$($FileName).cpp"
+    Set-ContentLineBeforeMarker -filePath $testsCmakeListPath -marker "#faudv6fbgzt" -lineToInsert "    $($FileName)/$($FileName)-tests.cpp"
 
     # Report
     Write-Host "Generated files:"

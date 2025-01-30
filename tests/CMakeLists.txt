@@ -9,6 +9,7 @@ set(TESTFILES        # All .cpp files in tests/
     aww-result/aww-result-tests.cpp
     aww-collection/aww-collection-tests.cpp
     aww-value-objects/aww-value-objects-tests.cpp
+    aww-pubsub/aww-pubsub-tests.cpp
     #faudv6fbgzt
 )
 

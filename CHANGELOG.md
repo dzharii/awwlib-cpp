@@ -2,6 +2,43 @@
 
 
 
+## 2025-01-30
+
+Added Publisher Subscriber class! 
+
+```cpp
+#include <iostream>
+#include "aww-pubsub/aww-pubsub.hpp"
+
+struct foo_event {
+  int value;
+};
+
+struct bar_event {
+  std::string name;
+};
+
+int main() {
+  aww::pubsub_event_bus bus;
+
+  auto foo_sub = bus.subscribe<foo_event>([](const foo_event& foo) {
+    std::cout << "foo_event -> value=" << foo.value << "\n";
+  });
+
+  auto bar_sub = bus.subscribe<bar_event>([](const bar_event& bar) {
+    std::cout << "bar_event -> name=" << bar.name << "\n";
+  });
+
+  bus.publish(foo_event{123});
+  bus.publish(bar_event{"HelloWorld"});
+
+  return 0;
+}
+
+```
+
+
+
 ## 2025-01-22 
 
 Refactoring.
