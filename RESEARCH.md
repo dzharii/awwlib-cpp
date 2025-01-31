@@ -20,39 +20,39 @@ To fix the issue, we updated the `CMakeLists.txt` of `awwlib-cpp` to use `CMAKE_
 
 ### Changes Made
 
-1. **Update `CMAKE_MODULE_PATH`:**
+**Update `CMAKE_MODULE_PATH`:**
 
-   ```cmake
-   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-   ```
+```cmake
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+```
 
-2. **Update Include Directories:**
+**Update Include Directories:**
 
-   ```cmake
-   target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-   ```
+```cmake
+target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+```
 
-3. **Review All Directory References:**
+**Review All Directory References:**
 
-   Replaced all instances of `CMAKE_SOURCE_DIR` and `PROJECT_SOURCE_DIR` intended to refer to the library's source directory with `CMAKE_CURRENT_SOURCE_DIR`.
+Replaced all instances of `CMAKE_SOURCE_DIR` and `PROJECT_SOURCE_DIR` intended to refer to the library's source directory with `CMAKE_CURRENT_SOURCE_DIR`.
 
-4. **Change Library Type:**
+**Change Library Type:**
 
-   Changed the library from an `OBJECT` library to a `STATIC` library to allow proper linking:
+Changed the library from an `OBJECT` library to a `STATIC` library to allow proper linking:
 
-   ```cmake
-   add_library(${LIBRARY_NAME} STATIC ${SOURCES})
-   ```
+```cmake
+add_library(${LIBRARY_NAME} STATIC ${SOURCES})
+```
 
-5. **Conditional Building for Tests and Examples:**
+**Conditional Building for Tests and Examples:**
 
-   Adjusted the build configuration to include tests and examples only when the library is the top-level project:
+Adjusted the build configuration to include tests and examples only when the library is the top-level project:
 
-   ```cmake
-   if (AWWLIB_TOPLEVEL_PROJECT)
-       add_subdirectory(tests)
-   endif()
-   ```
+```cmake
+if (AWWLIB_TOPLEVEL_PROJECT)
+    add_subdirectory(tests)
+endif()
+```
 
 ### Explanation
 

@@ -5,7 +5,11 @@ set(TESTFILES        # All .cpp files in tests/
     main.cpp
     dummy.cpp
     aww-string/aww-string-tests.cpp
-    aww-os/aww-os.cpp
+    aww-os/aww-os-tests.cpp
+    aww-result/aww-result-tests.cpp
+    aww-collection/aww-collection-tests.cpp
+    aww-value-objects/aww-value-objects-tests.cpp
+    aww-pubsub/aww-pubsub-tests.cpp
     #faudv6fbgzt
 )
 

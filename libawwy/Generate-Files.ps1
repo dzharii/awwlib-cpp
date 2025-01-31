@@ -5,7 +5,7 @@ function Generate-Files {
     )
 
     # Validate file name
-    if ($FileName -match '[^a-zA-Z0-9]') {
+    if ($FileName -match '[^a-zA-Z0-9_-]') {
         Write-Error "Error: File name must contain only alphanumeric characters. Error in: '$($FileName)'"
         return
     }
@@ -16,7 +16,7 @@ function Generate-Files {
     # Define file paths to be generated
     $faPath = "include\$($FileName)\$($FileName).hpp"
     $fbPath = "src\$($FileName)\$($FileName).cpp"
-    $fcPath = "tests\$($FileName)\$($FileName).cpp"
+    $fcPath = "tests\$($FileName)\$($FileName)-tests.cpp"
 
     function Get-CppValidIdentifier {
         param (
@@ -37,7 +37,6 @@ function Generate-Files {
     # Generate file content in memory
     $cppIdentifier = Get-CppValidIdentifier -inputString $FileName
     $faContent = @"
-#pragma once
 #ifndef ${cppIdentifier}_HPP
 #define ${cppIdentifier}_HPP
 
@@ -126,7 +125,7 @@ TEST_CASE("testcase template 1") {
     Set-ContentLineBeforeMarker -filePath $cmakeListPath -marker "#ge0mh0v43gk" -lineToInsert "    src/$($FileName)/$($FileName).cpp"
 
     # Update tests CMakeLists.txt
-    Set-ContentLineBeforeMarker -filePath $testsCmakeListPath -marker "#faudv6fbgzt" -lineToInsert "    $($FileName)/$($FileName).cpp"
+    Set-ContentLineBeforeMarker -filePath $testsCmakeListPath -marker "#faudv6fbgzt" -lineToInsert "    $($FileName)/$($FileName)-tests.cpp"
 
     # Report
     Write-Host "Generated files:"

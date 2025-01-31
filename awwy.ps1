@@ -17,6 +17,8 @@ $COMMAND_MDTREE = "mdtree"
 $COMMAND_BUILD_RELEASE = "build-release"
 $COMMAND_BUILD_DEBUG = "build-debug"
 $COMMAND_GEN = "gen"
+$COMMAND_CLANG_FORMAT_AUTOFIX = "clang-format-autofix"
+$COMMAND_GET_GIT_UNPUSHED_CHANGES = "get-git-unpushed-changes"
 
 $HELP_MESSAGE = @"
 Usage:
@@ -38,15 +40,22 @@ Commands:
       Builds the project using platform-specific build scripts and runs unit tests.
 
     $($COMMAND_GEN) -Name <file_name>:
-      Generates boilerplate header and source files for a new component. The file path should be in the format <type>/<name>,
-      such as 'model/componentName', which will create 'include/model/componentName.hpp' and 'src/model/componentName.cpp'.
+      Generates boilerplate header and source files for a new component. The file path should be in the format aww-something,
+      such as 'aww-string', which will create 'include/aww-something/aww-something.hpp' and 'src/aww-something/aww-something.cpp'.
       The new source file is also automatically added to the CMakeLists.txt file in the appropriate section.
+
+    $($COMMAND_CLANG_FORMAT_AUTOFIX):
+        Automatically formats source code files using clang-format.
+    $($COMMAND_GET_GIT_UNPUSHED_CHANGES):
+        Get unpushed changes in the current branch.
 "@
 
 . $libPath/Get-Platform.ps1
 . $libPath/Invoke-Build.ps1
 . $libPath/Create-MDTREE.ps1
 . $libPath/Generate-Files.ps1
+. $libPath/Invoke-ClangFormatAutofix.ps1
+. $libPath/Get-GitUnpushedChanges.ps1
 
 
 switch ($Command.ToLower()) {
@@ -72,6 +81,15 @@ switch ($Command.ToLower()) {
             exit 1
         }
         Generate-Files -FileName $Name
+    }
+
+    $COMMAND_CLANG_FORMAT_AUTOFIX {
+        Invoke-ClangFormatAutofix
+    }
+
+    $COMMAND_GET_GIT_UNPUSHED_CHANGES {
+       Get-GitUnpushedChanges | Set-Clipboard
+       Write-Host "Unpushed changes copied to clipboard"
     }
 
     Default {

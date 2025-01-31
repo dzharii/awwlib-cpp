@@ -19,6 +19,9 @@ else()
     set(AWWLIB_TOPLEVEL_PROJECT FALSE)
 endif()
 
+# Include external Lua project as a subdirectory
+add_subdirectory(external/lua)
+
 # This magic allows to build Debug and Release configuration in separate
 # directories for Windows / Linux
 set(MY_BUILD_OUTPUT_DIRECTORY "")
@@ -63,8 +66,25 @@ set(SOURCES          # All .cpp files in src/
     src/example.cpp
     src/aww-string/aww-string.cpp
     src/aww-os/aww-os.cpp
+    src/aww-result/aww-result.cpp
+    src/aww-collection/aww-collection.cpp
+    src/aww-value-objects/aww-value-objects.cpp
+    src/aww-pubsub/aww-pubsub.cpp
     #ge0mh0v43gk
 )
+
+if(WIN32)
+    list(APPEND SOURCES
+        src/aww-os/aww-os-windows.cpp
+    )
+elseif(UNIX AND NOT APPLE)
+    list(APPEND SOURCES
+        src/aww-os/aww-os-linux.cpp
+    )
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()
+
 set(TESTFILES        # All .cpp files in tests/
     #5x0qd25zn50
 )
@@ -76,11 +96,14 @@ set(LIBRARY_NAME awwlib)  # Default name for the library built from src/*.cpp (c
 # Compile all sources into a library.
 add_library(${LIBRARY_NAME} STATIC ${SOURCES})
 
-# Lib needs its header files, and users of the library must also see these (PUBLIC). (No change needed)
-target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# Add Lua include directories for public access
+target_include_directories(${LIBRARY_NAME} 
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/lua/src
+)
 
 # There's also (probably) doctests within the library, so we need to see this as well.
-target_link_libraries(${LIBRARY_NAME} PUBLIC doctest)
+target_link_libraries(${LIBRARY_NAME} PUBLIC lua::lua doctest)
 
 # Set the compile options you want (change as needed).
 target_set_warnings(${LIBRARY_NAME} ENABLE ALL AS_ERROR ALL DISABLE Annoying)
