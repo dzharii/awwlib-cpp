@@ -2,6 +2,21 @@
 
 
 
+## 2025-02-02
+
+Added the `aww-configuration-value-objects` module to support common configuration value objects. This module introduces the `hex_color` class (with optional alpha support) along with its derivatives `background_color` and `foreground_color` for consistent handling of hexadecimal color values.
+
+```cpp
+// Use the background_color class.
+aww::background_color bg_color("#ABCDEF");
+std::cout << "Background color:\n";
+std::cout << "  red:   " << bg_color.red() << "\n";
+std::cout << "  green: " << bg_color.green() << "\n";
+std::cout << "  blue:  " << bg_color.blue() << "\n\n";
+```
+
+
+
 ## 2025-01-30
 
 Added Publisher Subscriber class! 
