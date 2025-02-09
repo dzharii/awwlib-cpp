@@ -101,7 +101,7 @@ add_library(${LIBRARY_NAME} STATIC ${SOURCES})
 add_library(sol2 INTERFACE)
 
 # Add Lua include directories for public access
-target_include_directories(${LIBRARY_NAME} 
+target_include_directories(${LIBRARY_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/lua/src
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/v3.3.0/include
@@ -109,6 +109,7 @@ target_include_directories(${LIBRARY_NAME}
 
 # There's also (probably) doctests within the library, so we need to see this as well.
 target_link_libraries(${LIBRARY_NAME} PUBLIC lua::lua sol2 doctest)
+)
 
 # Set the compile options you want (change as needed).
 target_set_warnings(${LIBRARY_NAME} ENABLE ALL AS_ERROR ALL DISABLE Annoying)
