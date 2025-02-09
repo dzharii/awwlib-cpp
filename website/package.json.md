@@ -1,3 +1,16 @@
+# Docusarus modifications
+
+
+
+
+
+## 2025-02-09 
+
+This is my checkpoint for `package.json`, where I don't know why would I `swizzle` O_O really not clear what it does and I don't care for now! So, I will clean up it a bit, and save the old version here:
+
+
+
+```js
 {
   "name": "website",
   "version": "0.0.0",
@@ -7,7 +20,12 @@
     "start": "docusaurus start",
     "publish": "docusaurus build --out-dir ../docs",
     "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
     "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -41,3 +59,6 @@
     "node": ">=18.0"
   }
 }
+
+```
+
