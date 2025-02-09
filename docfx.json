@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "include",
+          "files": [
+            "**/*.h",
+            "**/*.hpp"
+          ]
+        },
+        {
+          "src": "src",
+          "files": [
+            "**/*.h",
+            "**/*.hpp"
+          ]
+        }
+      ],
+      "dest": "api",
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "src": "src_docs",
+        "files": [
+          "**/*.{md,yml}"
+        ]
+      },
+      {
+        "src": "api",
+        "files": [
+          "**/*.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "src": "src_docs",
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "docs",
+    "xref": [],
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "awwlib",
+      "_appTitle": "awwlib",
+      "_enableSearch": true,
+      "pdf": false
+    },
+    "markdownEngineName": "markdig",
+    "markdownEngineProperties": {
+      "EnableSourceInfo": true
+    }
+  }
+}

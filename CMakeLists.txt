@@ -70,6 +70,7 @@ set(SOURCES          # All .cpp files in src/
     src/aww-collection/aww-collection.cpp
     src/aww-value-objects/aww-value-objects.cpp
     src/aww-pubsub/aww-pubsub.cpp
+    src/aww-configuration-value-objects/aww-configuration-value-objects.cpp
     #ge0mh0v43gk
 )
 
@@ -96,14 +97,18 @@ set(LIBRARY_NAME awwlib)  # Default name for the library built from src/*.cpp (c
 # Compile all sources into a library.
 add_library(${LIBRARY_NAME} STATIC ${SOURCES})
 
+# Define Sol2 as an interface library
+add_library(sol2 INTERFACE)
+
 # Add Lua include directories for public access
-target_include_directories(${LIBRARY_NAME} 
+target_include_directories(${LIBRARY_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/lua/src
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/v3.3.0/include
 )
 
 # There's also (probably) doctests within the library, so we need to see this as well.
-target_link_libraries(${LIBRARY_NAME} PUBLIC lua::lua doctest)
+target_link_libraries(${LIBRARY_NAME} PUBLIC lua::lua sol2 doctest)
 
 # Set the compile options you want (change as needed).
 target_set_warnings(${LIBRARY_NAME} ENABLE ALL AS_ERROR ALL DISABLE Annoying)
