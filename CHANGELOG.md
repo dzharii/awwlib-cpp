@@ -2,6 +2,55 @@
 
 
 
+## 2025-02-08
+
+I have watched Jason Turner's talk: 
+
+[Secrets of C++ Scripting Bindings: Bridging Compile Time and Run](https://www.youtube.com/watch?v=Ny9-516Gh28) { www.youtube.com }
+
+and decided to integrate Sol2 to support better binding with Lua [ThePhD/sol2: Sol3 (sol2 v3.0)](https://github.com/ThePhD/sol2) {github.com}
+
+> C++ <-> Lua API wrapper with advanced features and top notch performance - is here, and it's great! 
+>
+> [sol2.rtfd.io/](http://sol2.rtfd.io/)
+
+```cpp
+#include <sol/sol.hpp>
+#include <iostream>
+
+int main() {
+    // Create a new Lua state
+    sol::state lua;
+    lua.open_libraries(sol::lib::base);
+
+    // Define a simple Lua script
+    const std::string script = R"(
+        function greet(name)
+            print("Hello, " .. name .. "!")
+        end
+
+        function add(a, b)
+            return a + b
+        end
+    )";
+
+    // Execute the Lua script
+    lua.script(script);
+
+    // Call Lua function from C++
+    lua["greet"]("World");
+
+    // Get Lua function and call it
+    sol::function add = lua["add"];
+    int result = add(3, 4);
+    std::cout << "Result of add(3, 4): " << result << std::endl;
+
+    return 0;
+}
+```
+
+
+
 ## 2025-02-02
 
 Added the `aww-configuration-value-objects` module to support common configuration value objects. This module introduces the `hex_color` class (with optional alpha support) along with its derivatives `background_color` and `foreground_color` for consistent handling of hexadecimal color values.
