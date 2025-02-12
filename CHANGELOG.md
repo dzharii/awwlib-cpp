@@ -1,5 +1,31 @@
 # AwwLib Changelog
 
+
+
+## 2025-02-11
+
+Added utf8 library
+
+`external\utf8proc-2.10.0`
+
+
+
+2025-02-12 [JuliaStrings/utf8proc: a clean C library for processing UTF-8 Unicode data](https://github.com/JuliaStrings/utf8proc) { github.com }
+
+> [juliastrings.github.io/utf8proc/](http://juliastrings.github.io/utf8proc/)
+>
+> [utf8proc](http://juliastrings.github.io/utf8proc/) is a small, clean C library that provides Unicode normalization, case-folding, and other operations for data in the [UTF-8 encoding](http://en.wikipedia.org/wiki/UTF-8). It was [initially developed](http://www.public-software-group.org/utf8proc) by Jan Behrens and the rest of the [Public Software Group](http://www.public-software-group.org/), who deserve *nearly all of the credit* for this package. With the blessing of the Public Software Group, the [Julia developers](http://julialang.org/) have taken over development of utf8proc, since the original developers have moved to other projects.
+>
+> (utf8proc is used for basic Unicode support in the [Julia language](http://julialang.org/), and the Julia developers became involved because they wanted to add Unicode 7 support and other features.)
+>
+> (The original utf8proc package also includes Ruby and PostgreSQL plug-ins. We removed those from utf8proc in order to focus exclusively on the C library.)
+>
+> The utf8proc package is licensed under the free/open-source [MIT "expat" license](http://opensource.org/licenses/MIT) (plus certain Unicode data governed by the similarly permissive [Unicode data license](http://www.unicode.org/copyright.html#Exhibit1)); please see the included `LICENSE.md` file for more detailed information.
+
+And supporting acceptance tests at `tests/external-utf8proc/external-utf8proc-tests.cpp`
+
+
+
 ## 2025-02-08
 
 I have watched Jason Turner's talk:
