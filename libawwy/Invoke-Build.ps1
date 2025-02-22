@@ -81,7 +81,7 @@ function Invoke-Build {
     # If $unitTestExecutable is set, it means one or both files were found and one is chosen
     if ($unitTestExecutable) {
         Write-Output "Using unit test executable at '$unitTestExecutable'"
-        & $unitTestExecutable "--success=1"
+        & "$unitTestExecutable --success=1"
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Unit tests failed with exit code: $LASTEXITCODE" -ForegroundColor Red
             exit 1
