@@ -56,9 +56,6 @@ std::string escape_html(const std::string& text) {
 /**
  * @brief Escapes an unclosed tag by replacing '<' with "&lt;" but leaving other characters intact.
  *
- * If the resulting text ends with an extraneous ")" (as in some malformed inputs),
- * it is removed.
- *
  * @param text The unclosed tag text.
  * @return The minimally escaped text.
  */
@@ -70,8 +67,6 @@ std::string escape_unclosed(const std::string& text) {
     else
       out.push_back(ch);
   }
-  if (!out.empty() && out.back() == ')')
-    out.pop_back();
   return out;
 }
 
