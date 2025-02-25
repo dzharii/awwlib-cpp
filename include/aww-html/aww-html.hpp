@@ -139,6 +139,8 @@ std::string sanitize_a_attributes(const std::string& attr_str) {
  * stripping out disallowed content, auto-closing tags as needed, and handling
  * malformed or obfuscated markup.
  *
+ * Now also strips all HTML comments.
+ *
  * @param input The UTF‑8 encoded HTML string.
  * @return aww::result<std::string> containing the sanitized HTML.
  */
@@ -149,6 +151,18 @@ aww::result<std::string> sanitize_html(const std::string& input) {
   bool last_tag_obfuscated = false;
 
   while (pos < input.size()) {
+    // If a comment starts here, skip it entirely.
+    if (input.compare(pos, 4, "<!--") == 0) {
+      size_t end_comment = input.find("-->", pos + 4);
+      if (end_comment != std::string::npos) {
+        pos = end_comment + 3;
+        continue;
+      } else {
+        // If no closing marker, skip the rest.
+        break;
+      }
+    }
+
     if (input[pos] == '<') {
       size_t gt_pos = input.find('>', pos);
       if (gt_pos == std::string::npos) {

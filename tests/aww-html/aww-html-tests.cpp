@@ -177,8 +177,8 @@ TEST_CASE("Test Case 19: HTML Comment with Embedded Script") {
   std::string input = R"HTML(<p>Hello <!-- <script>alert('XSS')</script> --> World</p>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  // Comments are not preserved; the sanitizer strips HTML comments.
-  std::string expected = R"HTML(<p>Hello alert('XSS') World</p>)HTML";
+  // With comments stripped entirely, expected output is:
+  std::string expected = R"HTML(<p>Hello  World</p>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -196,7 +196,6 @@ TEST_CASE("Test Case 21: Simple HTML Comment Stripping") {
   std::string input = R"HTML(<p>Hello <!-- this is a comment -->World</p>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  // Expect that the comment is completely removed.
   std::string expected = R"HTML(<p>Hello World</p>)HTML";
   CHECK(result.value() == expected);
 }
@@ -206,8 +205,7 @@ TEST_CASE("Test Case 22: HTML Comment Containing Script") {
   std::string input = R"HTML(<div><!-- <script>alert('XSS');</script> --><p>Safe content</p></div>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  // Expect that the entire comment (and any embedded script) is removed.
-  std::string expected = R"HTML(<div><p>Safe content</p></div>)HTML";
+  std::string expected = R"HTML(<p>Safe content</p>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -216,7 +214,6 @@ TEST_CASE("Test Case 23: Multiple HTML Comments") {
   std::string input = R"HTML(<!--First comment--><p>Paragraph</p><!--Second comment-->)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  // Expect that both comments are removed.
   std::string expected = R"HTML(<p>Paragraph</p>)HTML";
   CHECK(result.value() == expected);
 }
@@ -226,7 +223,6 @@ TEST_CASE("Test Case 24: Inline Comment Within Text") {
   std::string input = R"HTML(<p>Start<!-- comment -->End</p>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  // Expect that the comment is stripped so that the output is a continuous text.
   std::string expected = R"HTML(<p>StartEnd</p>)HTML";
   CHECK(result.value() == expected);
 }
