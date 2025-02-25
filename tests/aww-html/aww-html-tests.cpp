@@ -190,3 +190,43 @@ TEST_CASE("Test Case 20: Data URI in Anchor") {
   std::string expected = R"HTML(<a>Test</a>)HTML";
   CHECK(result.value() == expected);
 }
+
+// New Test Case 21: Simple HTML Comment Stripping
+TEST_CASE("Test Case 21: Simple HTML Comment Stripping") {
+  std::string input = R"HTML(<p>Hello <!-- this is a comment -->World</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Expect that the comment is completely removed.
+  std::string expected = R"HTML(<p>Hello World</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 22: HTML Comment Containing Script
+TEST_CASE("Test Case 22: HTML Comment Containing Script") {
+  std::string input = R"HTML(<div><!-- <script>alert('XSS');</script> --><p>Safe content</p></div>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Expect that the entire comment (and any embedded script) is removed.
+  std::string expected = R"HTML(<div><p>Safe content</p></div>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 23: Multiple HTML Comments in Document
+TEST_CASE("Test Case 23: Multiple HTML Comments") {
+  std::string input = R"HTML(<!--First comment--><p>Paragraph</p><!--Second comment-->)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Expect that both comments are removed.
+  std::string expected = R"HTML(<p>Paragraph</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 24: Inline Comment Within Text
+TEST_CASE("Test Case 24: Inline Comment Within Text") {
+  std::string input = R"HTML(<p>Start<!-- comment -->End</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Expect that the comment is stripped so that the output is a continuous text.
+  std::string expected = R"HTML(<p>StartEnd</p>)HTML";
+  CHECK(result.value() == expected);
+}
