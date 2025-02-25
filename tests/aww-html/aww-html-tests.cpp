@@ -134,3 +134,59 @@ TEST_CASE("Example 2: Malformed Input with Nested Unclosed Tags") {
   std::string expected = R"HTML(<h1>Title</h1><p>Paragraph with <i>italic text</i></p>)HTML";
   CHECK(result.value() == expected);
 }
+
+// New Test Case 15: Numeric Character Reference in Anchor
+TEST_CASE("Test Case 15: Numeric Character Reference in Anchor") {
+  std::string input =
+      R"HTML(<a href="&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;:alert(1)">Click me</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>Click me</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 16: Mixed Case and Whitespace in Href
+TEST_CASE("Test Case 16: Mixed Case and Whitespace in Href") {
+  std::string input = R"HTML(<a href="   HTTP://Example.com  ">Test</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a href="HTTP://Example.com">Test</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 17: Inline Event Handler in Allowed Tag
+TEST_CASE("Test Case 17: Inline Event Handler in Allowed Tag") {
+  std::string input = R"HTML(<h1 onclick="alert(1)">Header</h1>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<h1>Header</h1>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 18: Mixed Case <A> Tag with JavaScript Scheme
+TEST_CASE("Test Case 18: Mixed Case <A> Tag with JavaScript Scheme") {
+  std::string input = R"HTML(<A HREF="JaVaScRiPt:alert(1)">Test</A>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>Test</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 19: HTML Comment with Embedded Script
+TEST_CASE("Test Case 19: HTML Comment with Embedded Script") {
+  std::string input = R"HTML(<p>Hello <!-- <script>alert('XSS')</script> --> World</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Comments are preserved; the sanitizer does not strip HTML comments.
+  std::string expected = R"HTML(<p>Hello alert('XSS') World</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+// New Test Case 20: Data URI in Anchor
+TEST_CASE("Test Case 20: Data URI in Anchor") {
+  std::string input = R"HTML(<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">Test</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>Test</a>)HTML";
+  CHECK(result.value() == expected);
+}
