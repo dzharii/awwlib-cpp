@@ -2,6 +2,33 @@
 
 
 
+## 2025-02-25
+
+I have added a new HTML sanitizer in our project (see `include/aww-html/aww-html.hpp`). The sanitizer now only allows safe tags (like `<h1>`–`<h6>`, `<p>`, `<b>`, `<i>`, `<em>`, `<strong>`, and `<a>`) and strips out everything else. For `<a>` tags, it keeps only the `href` attribute if it starts with "http://" or "https://", blocking unsafe URL schemes. It also auto-closes unclosed tags and detects obfuscated markup to prevent hidden injections. On top of that, I’ve added a feature to strip all HTML comments, so no hidden code remains.
+
+For example:
+
+```cpp
+std::string input = "<h1>Welcome</h1><p>Hello <!-- secret code --> World</p>";
+auto result = aww::sanitize_html(input);
+// result.value() returns: "<h1>Welcome</h1><p>Hello World</p>"
+```
+
+This update improves our security against XSS and other injection attacks.
+
+```cpp
+xss("<script>alert('XSS')</script>") == sanitized ==> ""
+xss("<img src=x onerror=alert('XSS')>") == sanitized ==> "&lt;img src=x onerror=alert('XSS')"
+xss("<a href=\"javascript:alert(1)\">Click me</a>") == sanitized ==> "<a>Click me</a>"
+xss("<scr<script>ipt>alert('XSS')</scr<script>ipt>") == sanitized ==> "alert('XSS')"
+xss("<!-- <script>alert('XSS')</script> -->") == sanitized ==> ""
+xss("<svg/onload=alert('XSS')>") == sanitized ==> "alert('XSS')"
+xss("<a href='data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=='>Test</a>") == sanitized ==> "<a>Test</a>"
+
+```
+
+
+
 ## 2025-02-11
 
 Added utf8 library

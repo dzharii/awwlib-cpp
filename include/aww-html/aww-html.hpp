@@ -22,7 +22,7 @@ const std::unordered_set<std::string> block_level_tags{"h1", "h2", "h3", "h4", "
 const std::unordered_set<std::string> inline_tags{"b", "i", "em", "strong", "a"};
 
 /**
- * @brief Escapes HTML special characters in plain text.
+ * @brief Escapes HTML special characters in plain text. (aww tag #4v11pr9oe5v)
  *
  * Converts &, <, >, and " into their HTML-escaped equivalents.
  *
@@ -54,7 +54,8 @@ std::string escape_html(const std::string& text) {
 }
 
 /**
- * @brief Escapes an unclosed tag by replacing '<' with "&lt;" but leaving other characters intact.
+ * @brief Escapes an unclosed tag by replacing '<' with "&lt;" but leaving other characters intact. (aww tag
+ * #2bv6uzc77qt)
  *
  * @param text The unclosed tag text.
  * @return The minimally escaped text.
@@ -71,7 +72,7 @@ std::string escape_unclosed(const std::string& text) {
 }
 
 /**
- * @brief Extracts the value of the href attribute from an attribute string.
+ * @brief Extracts the value of the href attribute from an attribute string. (aww tag #avpfv0622c4)
  *
  * Searches case-insensitively for "href=" and then extracts the quoted value.
  * Leading and trailing whitespace in the value are removed.
@@ -101,7 +102,7 @@ std::string extract_href(const std::string& attr_str) {
 }
 
 /**
- * @brief Validates that an href value is a valid HTTP or HTTPS URL.
+ * @brief Validates that an href value is a valid HTTP or HTTPS URL. (aww tag #a9m6pi7re2c)
  *
  * Trims leading whitespace, converts the URL to lowercase,
  * and checks that it starts with either "http://" or "https://".
@@ -117,7 +118,7 @@ bool is_safe_href(const std::string& href) {
 }
 
 /**
- * @brief Sanitizes the attribute string for an <a> tag.
+ * @brief Sanitizes the attribute string for an <a> tag. (aww tag #zts40aofduh)
  *
  * Extracts the href attribute; if the value is valid (i.e. a safe http(s) link),
  * it is preserved.
@@ -133,7 +134,7 @@ std::string sanitize_a_attributes(const std::string& attr_str) {
 }
 
 /**
- * @brief Sanitizes the provided HTML input.
+ * @brief Sanitizes the provided HTML input. (aww tag #y9ma5rqz6eg)
  *
  * Processes the input string, preserving only allowed tags and attributes,
  * stripping out disallowed content, auto-closing tags as needed, and handling
