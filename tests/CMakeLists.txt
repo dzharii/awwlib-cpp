@@ -12,7 +12,8 @@ set(TESTFILES        # All .cpp files in tests/
     aww-pubsub/aww-pubsub-tests.cpp
     aww-configuration-value-objects/aww-configuration-value-objects-tests.cpp
     external-sol/external-sol2-tests.cpp
-    external-utf8proc/external-utf8proc-tests.cpp 
+    external-utf8proc/external-utf8proc-tests.cpp
+    aww-html/aww-html-tests.cpp
     #faudv6fbgzt
 )
 

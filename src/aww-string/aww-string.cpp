@@ -48,4 +48,15 @@ void string_trim_right_inplace(std::string& str) {
   return out;
 }
 
+std::string to_lower_case(const std::string& str) {
+  std::string lower_str = str;
+  to_lower_case_inplace(lower_str);
+  return lower_str;
+}
+
+void to_lower_case_inplace(std::string& str) {
+  std::transform(str.begin(), str.end(), str.begin(),
+                 [](unsigned char c) -> char { return static_cast<char>(std::tolower(c)); });
+}
+
 } // namespace aww

@@ -29,5 +29,20 @@ void string_trim_right_inplace(std::string& str);
  */
 [[nodiscard]] std::string join_vector(const std::vector<std::string_view>& collection, std::string_view delimiter);
 
+/**
+ * @brief Converts a string to lowercase. (aww tag #igx5i94qp5s)
+ *
+ * @param str The string to convert.
+ * @return A new string with all characters converted to lowercase.
+ */
+[[nodiscard]] std::string to_lower_case(const std::string& str);
+
+/**
+ * @brief Converts a string to lowercase in place. (aww tag #0fc8jk90edv)
+ *
+ * @param str The string to convert.
+ */
+void to_lower_case_inplace(std::string& str);
+
 } // namespace aww
 #endif // AWW_STRING_HPP

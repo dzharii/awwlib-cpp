@@ -72,6 +72,7 @@ set(SOURCES          # All .cpp files in src/
     src/aww-value-objects/aww-value-objects.cpp
     src/aww-pubsub/aww-pubsub.cpp
     src/aww-configuration-value-objects/aww-configuration-value-objects.cpp
+    src/aww-html/aww-html.cpp
     #ge0mh0v43gk
 )
 
