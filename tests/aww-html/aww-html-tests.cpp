@@ -6,8 +6,9 @@ TEST_CASE("Test Case 1: Valid HTML with Allowed Tags") {
       R"HTML(<h1>Welcome</h1><p>This is a <b>test</b> paragraph with an <a href="http://example.com">example link</a>.</p>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
+  // Expected output exactly matches the valid input.
   std::string expected =
-      R"HTML(<h1>Welcome</h1><p>This is a <b>test</b> paragraph with an <a href="http://example.com">example link</a></p></h1>)HTML";
+      R"HTML(<h1>Welcome</h1><p>This is a <b>test</b> paragraph with an <a href="http://example.com">example link</a>.</p>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -122,7 +123,7 @@ TEST_CASE("Example 1: Mixed Valid and Invalid Content") {
       R"HTML(<p>Hello, <b>world</b>! <img src="invalid" onerror="alert(1)"> Welcome to <a href="javascript:alert(1)">our site</a>.</p>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<p>Hello, <b>world</b>!  Welcome to <a>our site</a></p>)HTML";
+  std::string expected = R"HTML(<p>Hello, <b>world</b>!  Welcome to <a>our site</a>.</p>)HTML";
   CHECK(result.value() == expected);
 }
 
