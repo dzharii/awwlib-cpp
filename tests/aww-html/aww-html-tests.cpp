@@ -177,7 +177,7 @@ TEST_CASE("Test Case 19: HTML Comment with Embedded Script") {
   std::string input = R"HTML(<p>Hello <!-- <script>alert('XSS')</script> --> World</p>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  // Comments are preserved; the sanitizer does not strip HTML comments.
+  // Comments are not preserved; the sanitizer strips HTML comments.
   std::string expected = R"HTML(<p>Hello alert('XSS') World</p>)HTML";
   CHECK(result.value() == expected);
 }
