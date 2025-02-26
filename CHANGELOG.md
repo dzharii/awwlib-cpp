@@ -2,6 +2,94 @@
 
 
 
+## 2025-02-26 
+
+Continue with `aww::sanitize_html`; I have found this amazing bag of XSSes:
+
+2025-02-26 🚩 [payloadbox/xss-payload-list: 🎯 Cross Site Scripting ( XSS ) Vulnerability Payload List](https://github.com/payloadbox/xss-payload-list) { github.com }
+
+
+
+Also, once the tests are fixed, it is time to extend the allowed tag list:
+
+> ✅ **Recommended Safe Text Elements**
+>
+> #### **Text Content and Inline Formatting**
+>
+> - `<b>` – Bold text (without emphasis)
+> - `<strong>` – Important text (semantic emphasis)
+> - `<i>` – Italicized text (without emphasis)
+> - `<em>` – Emphasized text (semantic emphasis)
+> - `<u>` – Underlined text
+> - `<s>` – Strikethrough text
+> - `<sub>` – Subscript text
+> - `<sup>` – Superscript text
+> - `<small>` – Smaller text
+> - `<mark>` – Highlighted text
+> - `<abbr>` – Abbreviations (with title attributes for explanations)
+> - `<cite>` – Citation of works
+> - `<q>` – Inline quotations
+> - `<code>` – Inline code snippets
+> - `<kbd>` – Keyboard input representation
+> - `<var>` – Variable names in programming/math context
+> - `<time>` – Machine-readable dates/times
+> - `<dfn>` – Definition term
+> - `<bdi>` – Bi-directional isolation
+> - `<bdo>` – Bi-directional override
+>
+> ------
+>
+> **Block-Level Text Content Elements**
+>
+> - `<p>` – Paragraphs
+> - `<blockquote>` – Block quotations
+> - `<pre>` – Preformatted text (for code blocks or ASCII art)
+> - `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>` – Headings
+> - `<hr>` – Horizontal rule (for thematic breaks)
+> - `<br>` – Line breaks
+>
+> ------
+>
+> **Lists (Textual Only)**
+>
+> - `<ul>` – Unordered lists
+> - `<ol>` – Ordered lists
+> - `<li>` – List items
+> - `<dl>` – Description lists
+> - `<dt>` – Description terms
+> - `<dd>` – Description definitions
+>
+> ------
+>
+> **Text-Related Links (Optional for Text Context)**
+>
+> - `<a>` – Hyperlinks (only if you sanitize `href` attributes properly)
+>
+> ------
+>
+> 🚫 **Elements to Exclude for Text-Only Sanitization**
+>
+> - `<div>`, `<span>` – Purely structural/neutral (unless you need attributes like `lang`, which you can whitelist separately)
+> - `<table>`, `<tr>`, `<td>`, `<th>` – Structural, not for plain text
+> - `<form>`, `<input>`, `<button>`, `<select>` – Interactive elements
+> - `<script>`, `<style>`, `<iframe>` – Security risks, always exclude
+> - `<img>`, `<video>`, `<audio>` – Media, not textual
+> - `<nav>`, `<aside>`, `<section>`, `<article>`, `<header>`, `<footer>` – Structural content
+> - `<figure>`, `<figcaption>` – Media captions (exclude unless captions are critical)
+> - `<canvas>`, `<svg>`, `<object>` – Non-text visual elements
+>
+> ------
+>
+> 🔒 **Security Considerations**
+>
+> - **Attributes**: Strip all attributes except safe ones (e.g., `href` in `<a>`, `title` in `<abbr>`, `datetime` in `<time>`).
+> - **Event Handlers**: Remove all `on*` event attributes (like `onclick`) to prevent XSS attacks.
+> - **Protocol Whitelisting**: For `<a href>`, allow only safe protocols (`http`, `https`, `mailto`), block `javascript:`, `data:`, etc.
+
+
+
+
+
 ## 2025-02-25
 
 Continue with `aww::sanitize_html`

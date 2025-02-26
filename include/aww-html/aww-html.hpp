@@ -1,6 +1,12 @@
 #ifndef AWW_HTML_HPP
 #define AWW_HTML_HPP
 
+/**
+ * 2025-02-26
+ * WARNING: This is very naive implementation of HTML sanitization.
+ * Written by GPT-o3-mini-high
+ */
+
 #include <algorithm>
 #include <cctype>
 #include <iostream>
