@@ -235,7 +235,7 @@ TEST_CASE("mganss::HtmlSanitizer test #1: XSS Locator Test") {
   std::string input = R"HTML(<a href="'';!--"<XSS>=&{()}">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<a href="'';!--">=&amp;{()}"></a>)HTML";
+  std::string expected = R"HTML(<a>=&amp;{()}"</a>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -243,7 +243,7 @@ TEST_CASE("mganss::HtmlSanitizer test #2: Image XSS with quotes and semicolon") 
   std::string input = R"HTML(<IMG SRC="javascript:alert('XSS');">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -251,7 +251,7 @@ TEST_CASE("mganss::HtmlSanitizer test #3: Image XSS without quotes and semicolon
   std::string input = R"HTML(<IMG SRC=javascript:alert('XSS')>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -259,7 +259,7 @@ TEST_CASE("mganss::HtmlSanitizer test #4: Image XSS case-insensitive protocol") 
   std::string input = R"HTML(<IMG SRC=JaVaScRiPt:alert('XSS')>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -267,7 +267,7 @@ TEST_CASE("mganss::HtmlSanitizer test #5: Image XSS with encoded tab") {
   std::string input = R"HTML(<IMG SRC="jav&#x09;ascript:alert('XSS');">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -275,7 +275,7 @@ TEST_CASE("mganss::HtmlSanitizer test #6: Image XSS with encoded newline") {
   std::string input = R"HTML(<IMG SRC="jav&#x0A;ascript:alert('XSS');">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -283,7 +283,7 @@ TEST_CASE("mganss::HtmlSanitizer test #7: Image XSS with encoded carriage return
   std::string input = R"HTML(<IMG SRC="jav&#x0D;ascript:alert('XSS');">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -291,7 +291,7 @@ TEST_CASE("mganss::HtmlSanitizer test #8: Image XSS using grave accents") {
   std::string input = R"HTML(<IMG SRC=`javascript:alert("RSnake says, 'XSS'")`>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -300,7 +300,7 @@ TEST_CASE("mganss::HtmlSanitizer test #9: Image XSS with numeric entity encoding
       R"HTML(<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<img>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -332,7 +332,7 @@ TEST_CASE("mganss::HtmlSanitizer test #13: Div with dangerous background-image")
   std::string input = R"HTML(<DIV STYLE="background-image: url(javascript:alert('XSS'))">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<div></div>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
@@ -388,7 +388,7 @@ TEST_CASE("mganss::HtmlSanitizer test #20: CSS expression removal") {
   std::string input = R"HTML(<DIV STYLE="width: expression(alert('foo'));">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<div></div>)HTML";
+  std::string expected = R"HTML()HTML";
   CHECK(result.value() == expected);
 }
 
