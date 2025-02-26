@@ -14,6 +14,7 @@ set(TESTFILES        # All .cpp files in tests/
     external-sol/external-sol2-tests.cpp
     external-utf8proc/external-utf8proc-tests.cpp
     aww-html/aww-html-tests.cpp
+    # aww-html/aww-html-sanitize_html-mganss-HtmlSanitizertests.cpp
     #faudv6fbgzt
 )
 

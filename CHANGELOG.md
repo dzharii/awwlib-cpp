@@ -4,6 +4,24 @@
 
 ## 2025-02-25
 
+Continue with `aww::sanitize_html`
+
+I have discovered this project, which I am planning to use for testing and coding inspiration (yep, by rewriting some code)
+
+**Credit:**
+
+This set of tests was created by **Michael Ganss**.
+
+- **Author Profile:** [Michael Ganss on GitHub](https://github.com/mganss)
+- **Project:** [HtmlSanitizer on GitHub](https://github.com/mganss/HtmlSanitizer)
+  *HtmlSanitizer* is a .NET library that cleans HTML to prevent XSS attacks by removing unwanted tags, attributes, and scripts while allowing safe elements and formatting.
+
+
+
+
+
+## 2025-02-25
+
 I have added a new HTML sanitizer in our project (see `include/aww-html/aww-html.hpp`). The sanitizer now only allows safe tags (like `<h1>`–`<h6>`, `<p>`, `<b>`, `<i>`, `<em>`, `<strong>`, and `<a>`) and strips out everything else. For `<a>` tags, it keeps only the `href` attribute if it starts with "http://" or "https://", blocking unsafe URL schemes. It also auto-closes unclosed tags and detects obfuscated markup to prevent hidden injections. On top of that, I’ve added a feature to strip all HTML comments, so no hidden code remains.
 
 For example:

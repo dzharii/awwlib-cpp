@@ -226,3 +226,216 @@ TEST_CASE("Test Case 24: Inline Comment Within Text") {
   std::string expected = R"HTML(<p>StartEnd</p>)HTML";
   CHECK(result.value() == expected);
 }
+
+// Credit: These tests were created by Michael Ganss (mganss).
+// Profile: https://github.com/mganss
+// Project: https://github.com/mganss/HtmlSanitizer
+
+TEST_CASE("mganss::HtmlSanitizer test #1: XSS Locator Test") {
+  std::string input = R"HTML(<a href="'';!--"<XSS>=&{()}">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a href="'';!--">=&amp;{()}"></a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #2: Image XSS with quotes and semicolon") {
+  std::string input = R"HTML(<IMG SRC="javascript:alert('XSS');">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #3: Image XSS without quotes and semicolon") {
+  std::string input = R"HTML(<IMG SRC=javascript:alert('XSS')>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #4: Image XSS case-insensitive protocol") {
+  std::string input = R"HTML(<IMG SRC=JaVaScRiPt:alert('XSS')>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #5: Image XSS with encoded tab") {
+  std::string input = R"HTML(<IMG SRC="jav&#x09;ascript:alert('XSS');">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #6: Image XSS with encoded newline") {
+  std::string input = R"HTML(<IMG SRC="jav&#x0A;ascript:alert('XSS');">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #7: Image XSS with encoded carriage return") {
+  std::string input = R"HTML(<IMG SRC="jav&#x0D;ascript:alert('XSS');">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #8: Image XSS using grave accents") {
+  std::string input = R"HTML(<IMG SRC=`javascript:alert("RSnake says, 'XSS'")`>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #9: Image XSS with numeric entity encoding") {
+  std::string input =
+      R"HTML(<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<img>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #10: Iframe XSS") {
+  std::string input = R"HTML(<IFRAME SRC="javascript:alert('XSS');"></IFRAME>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML()HTML"; // empty output
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #11: Anchor with javascript href") {
+  std::string input = R"HTML(<A HREF="javascript:alert(1)">XSS</A>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>XSS</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #12: Script tag removal") {
+  std::string input = R"HTML(<script>alert('xss')</script>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML()HTML"; // empty output
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #13: Div with dangerous background-image") {
+  std::string input = R"HTML(<DIV STYLE="background-image: url(javascript:alert('XSS'))">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<div></div>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #14: Base tag with javascript href") {
+  std::string input = R"HTML(<BASE HREF="javascript:alert('XSS');//">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML()HTML"; // empty output
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #15: Embed tag removal") {
+  std::string input = R"HTML(<EMBED SRC="http://ha.ckers.org/xss.swf" AllowScriptAccess="always"></EMBED>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML()HTML"; // empty output
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #16: XML with CDATA removal") {
+  std::string input = R"HTML(<XML ID=I><X><C><![CDATA[<IMG SRC="javascript:alert('XSS');">]]></C></X></xml>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML()HTML"; // empty output
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #17: Mailto href removal in anchor") {
+  std::string input = R"HTML(<a href="mailto:test@example.com">test</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>test</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #18: Valid HTTP anchor remains") {
+  std::string input = R"HTML(<a href="http://example.com">test</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a href="http://example.com">test</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #19: Invalid FTP href removed") {
+  std::string input = R"HTML(<a href="ftp://example.com">test</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>test</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #20: CSS expression removal") {
+  std::string input = R"HTML(<DIV STYLE="width: expression(alert('foo'));">)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<div></div>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #21: Data URI in anchor removed") {
+  std::string input = R"HTML(<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">Test</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a>Test</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #22: HTML Comment Stripping 1") {
+  std::string input = R"HTML(<p>Hello <!-- this is a comment -->World</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Hello World</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #23: HTML Comment Stripping 2") {
+  std::string input = R"HTML(<div><!-- <script>alert('XSS');</script> --><p>Safe content</p></div>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Safe content</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #24: Multiple HTML Comments") {
+  std::string input = R"HTML(<!--First comment--><p>Paragraph</p><!--Second comment-->)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Paragraph</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #25: Inline HTML Comment") {
+  std::string input = R"HTML(<p>Start<!-- comment -->End</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>StartEnd</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("mganss::HtmlSanitizer test #26: HTML Comment with Embedded Script") {
+  std::string input = R"HTML(<p>Hello <!-- <script>alert('XSS')</script> --> World</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Hello  World</p>)HTML";
+  CHECK(result.value() == expected);
+}
