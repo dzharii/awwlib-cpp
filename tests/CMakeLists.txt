@@ -13,6 +13,7 @@ set(TESTFILES        # All .cpp files in tests/
     aww-configuration-value-objects/aww-configuration-value-objects-tests.cpp
     external-sol/external-sol2-tests.cpp
     external-utf8proc/external-utf8proc-tests.cpp
+    external-tidy/external-tidy-tests.cpp
     aww-html/aww-html-tests.cpp
     # aww-html/aww-html-sanitize_html-mganss-HtmlSanitizertests.cpp
     #faudv6fbgzt
@@ -25,7 +26,7 @@ set(TEST_RUNNER_PARAMS "")  # Any arguemnts to feed the test runner (change as n
 #                         Make Tests (no change needed).
 # --------------------------------------------------------------------------------
 add_executable(${TEST_MAIN} ${TESTFILES})
-target_link_libraries(${TEST_MAIN} PRIVATE ${LIBRARY_NAME} doctest)
+target_link_libraries(${TEST_MAIN} PRIVATE ${LIBRARY_NAME} tidy-static doctest)
 target_set_warnings(${TEST_MAIN} ENABLE ALL AS_ERROR ALL DISABLE Annoying) # Set warnings (if needed).
 
 # Suppress unused parameter warnings across different compilers in tests only.

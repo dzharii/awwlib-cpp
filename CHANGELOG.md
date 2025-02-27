@@ -2,6 +2,16 @@
 
 
 
+## 2025-02-27 Late night libtidy!
+
+Included libtidy!
+
+2025-02-27 [Tidy Developer](https://www.html-tidy.org/developer/) {www.html-tidy.org}
+
+- 2025-02-27 [Tidy - Browse /5.8.0 at SourceForge.net](https://sourceforge.net/projects/html-tidy.mirror/files/5.8.0/) {sourceforge.net}
+
+
+
 ## 2025-02-26 
 
 Continue with `aww::sanitize_html`; I have found this amazing bag of XSSes:
