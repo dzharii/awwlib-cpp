@@ -10,6 +10,14 @@ Included libtidy!
 
 - 2025-02-27 [Tidy - Browse /5.8.0 at SourceForge.net](https://sourceforge.net/projects/html-tidy.mirror/files/5.8.0/) {sourceforge.net}
 
+> Design factors
+>
+> - **`libtidy`** is easy to integrate. Because of the near universal adoption of C linkage, a C interface may be called from a great number of programming languages.
+> - **`libtidy`** was designed to use opaque types in the public interface. This allows the application to just pass an integer around and the need to transform data types in different languages is minimized. As a results it’s straight-forward to write very thin library wrappers for C++, Pascal, and COM/ATL.
+> - **`libtidy`** eats its own dogfood. **HTML Tidy** links directly to **`libtidy`**.
+> - **`libtidy`** is Thread Safe and Re-entrant. Because there are many uses for HTML Tidy - from content validation, content scraping, conversion to XHTML - it was important to make **`libtidy`** run reasonably well within server applications as well as client side.
+> - **`libtidy`** uses adaptable I/O. As part of the larger integration strategy it was decided to fully abstract all I/O. This means a (relatively) clean separation between character encoding processing and shovelling bytes back and forth. Internally, the library reads from *sources* and writes to *sinks*. This abstraction is used for both markup and configuration “files”. Concrete implementations are provided for file and memory I/O, and new sources and sinks may be provided via the public interface.
+
 
 
 ## 2025-02-26 
