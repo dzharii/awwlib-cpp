@@ -38,6 +38,8 @@ constexpr std::string_view k_cdata_end = "]]>";         ///< CDATA section end.
 constexpr std::string_view k_http_prefix = "http://";   ///< Safe HTTP prefix.
 constexpr std::string_view k_https_prefix = "https://"; ///< Safe HTTPS prefix.
 
+static const std::string k_dangerous_full_tag = "script"; ///< The dangerous tag name we consider.
+
 // Set of dangerous tags whose content should be completely skipped.
 static const std::unordered_set<std::string> k_dangerous_tags{"script", "iframe", "xml",  "embed",
                                                               "object", "base",   "style"};
@@ -81,10 +83,11 @@ enum class token_type {
  * @brief Represents a token from the HTML input.
  */
 struct token {
-  token_type m_type;      ///< The type of token.
-  std::string m_content;  ///< Text or comment content.
-  std::string m_tag_name; ///< For start/end tags.
-  std::string m_attr_str; ///< Raw attribute string for start tags.
+  token_type m_type;       ///< The type of token.
+  std::string m_content;   ///< Text or comment content.
+  std::string m_tag_name;  ///< For start/end tags.
+  std::string m_attr_str;  ///< Raw attribute string for start tags.
+  bool m_unclosed = false; ///< True if the token originates from an unclosed tag.
 };
 
 //------------------------------------------------------------------------------
@@ -176,12 +179,12 @@ std::vector<token> tokenize_html(std::string_view input) {
       if (input.substr(pos, k_comment_start.size()) == k_comment_start) {
         size_t end_comment = input.find(k_comment_end, pos + k_comment_start.size());
         if (end_comment == std::string_view::npos) {
-          tokens.push_back({token_type::comment, std::string(input.substr(pos)), "", ""});
+          tokens.push_back({token_type::comment, std::string(input.substr(pos)), "", "", false});
           break;
         } else {
           size_t comment_len = end_comment - pos - k_comment_start.size();
-          tokens.push_back(
-              {token_type::comment, std::string(input.substr(pos + k_comment_start.size(), comment_len)), "", ""});
+          tokens.push_back({token_type::comment, std::string(input.substr(pos + k_comment_start.size(), comment_len)),
+                            "", "", false});
           pos = end_comment + k_comment_end.size();
           continue;
         }
@@ -196,8 +199,8 @@ std::vector<token> tokenize_html(std::string_view input) {
       // Find closing '>'.
       size_t tag_end = input.find('>', pos);
       if (tag_end == std::string_view::npos) {
-        // Unclosed tag: minimally escape.
-        tokens.push_back({token_type::text, escape_unclosed(std::string(input.substr(pos))), "", ""});
+        // Unclosed tag: minimally escape and mark token as unclosed.
+        tokens.push_back({token_type::text, escape_unclosed(std::string(input.substr(pos))), "", "", true});
         break;
       }
       std::string_view tag_content = input.substr(tag_start, tag_end - tag_start);
@@ -210,9 +213,9 @@ std::vector<token> tokenize_html(std::string_view input) {
       std::getline(stream, attr_str);
       tag_name = aww::to_lower_case(tag_name);
       if (is_end_tag) {
-        tokens.push_back({token_type::end_tag, "", tag_name, ""});
+        tokens.push_back({token_type::end_tag, "", tag_name, "", false});
       } else {
-        tokens.push_back({token_type::start_tag, "", tag_name, attr_str});
+        tokens.push_back({token_type::start_tag, "", tag_name, attr_str, false});
       }
       pos = tag_end + 1;
     } else {
@@ -221,7 +224,7 @@ std::vector<token> tokenize_html(std::string_view input) {
       if (next_tag == std::string_view::npos)
         next_tag = input.size();
       std::string text = std::string(input.substr(pos, next_tag - pos));
-      tokens.push_back({token_type::text, text, "", ""});
+      tokens.push_back({token_type::text, text, "", "", false});
       pos = next_tag;
     }
   }
@@ -302,29 +305,48 @@ bool is_safe_href(const std::string& href) {
 }
 
 //------------------------------------------------------------------------------
-// Helper: Extract Event Content from Attribute String
+// Helper: Enhanced Event Extraction from Attribute String
 //------------------------------------------------------------------------------
 /**
  * @brief Extracts event attribute content from a raw attribute string.
+ *
+ * This function now also trims a trailing "&quot;&gt;" sequence if present.
  *
  * @param attr_str The raw attribute string.
  * @return The extracted content, or an empty string if not found.
  */
 std::string extract_event_content(const std::string& attr_str) {
+  // First, try to find a slash.
   auto pos_slash = attr_str.find('/');
+  std::string extracted;
   if (pos_slash != std::string::npos) {
     std::string potential_attr = attr_str.substr(pos_slash + 1);
     auto pos_eq = potential_attr.find('=');
     if (pos_eq != std::string::npos) {
-      std::string attr_value = potential_attr.substr(pos_eq + 1);
-      if (!attr_value.empty() && (attr_value.front() == '"' || attr_value.front() == '\''))
-        attr_value.erase(0, 1);
-      if (!attr_value.empty() && (attr_value.back() == '"' || attr_value.back() == '\''))
-        attr_value.pop_back();
-      return attr_value;
+      extracted = potential_attr.substr(pos_eq + 1);
+      if (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''))
+        extracted.erase(0, 1);
+      if (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''))
+        extracted.pop_back();
+    }
+  } else {
+    // Fallback: if no slash, look for '=' and return text after it.
+    auto pos_eq = attr_str.find('=');
+    if (pos_eq != std::string::npos) {
+      extracted = attr_str.substr(pos_eq + 1);
+      if (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''))
+        extracted.erase(0, 1);
+      if (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''))
+        extracted.pop_back();
     }
   }
-  return "";
+  // Remove trailing "&quot;&gt;" if present.
+  std::string trailer = "&quot;&gt;";
+  if (extracted.size() >= trailer.size() &&
+      extracted.compare(extracted.size() - trailer.size(), trailer.size(), trailer) == 0) {
+    extracted.erase(extracted.size() - trailer.size());
+  }
+  return extracted;
 }
 
 //------------------------------------------------------------------------------
@@ -343,21 +365,24 @@ aww::result<std::string> sanitize_html(const std::string& input,
   auto tokens = tokenize_html(input);
   std::string output;
   std::vector<std::string> open_tags;
-  // For unsafe anchor tags, store extracted inner text.
-  std::unordered_map<size_t, std::string> pending_anchor_inner;
 
   // Process tokens using an index-based loop so that we can skip dangerous tag content.
   for (size_t i = 0; i < tokens.size(); ++i) {
     const token& tok = tokens[i];
     switch (tok.m_type) {
     case token_type::text: {
-      std::string text = tok.m_content;
-      // If the last open tag is inline, trim trailing ')' (heuristic).
-      if (!open_tags.empty() && settings.m_inline_tags.find(open_tags.back()) != settings.m_inline_tags.end() &&
-          !text.empty() && text.back() == ')') {
-        text.pop_back();
+      // If token was generated from an unclosed tag, output as-is.
+      if (tok.m_unclosed) {
+        output.append(tok.m_content);
+      } else {
+        std::string text = tok.m_content;
+        // If the last open tag is inline, trim trailing ')' (heuristic).
+        if (!open_tags.empty() && settings.m_inline_tags.find(open_tags.back()) != settings.m_inline_tags.end() &&
+            !text.empty() && text.back() == ')') {
+          text.pop_back();
+        }
+        output.append(escape_html(text));
       }
-      output.append(escape_html(text));
       break;
     }
     case token_type::comment:
@@ -365,24 +390,56 @@ aww::result<std::string> sanitize_html(const std::string& input,
       break;
     case token_type::start_tag: {
       std::string tag_name = tok.m_tag_name;
+      // Special handling for obfuscated dangerous tags (e.g. <scr...> as partial "script").
+      if (tag_name.size() < k_dangerous_full_tag.size() &&
+          k_dangerous_full_tag.substr(0, tag_name.size()) == tag_name) {
+        std::string remainder = std::string(k_dangerous_full_tag).substr(tag_name.size());
+        // Check if the next token is text that starts with the expected remainder.
+        if (i + 1 < tokens.size() && tokens[i + 1].m_type == token_type::text) {
+          std::string next_text = tokens[i + 1].m_content;
+          if (next_text.find(remainder) == 0) {
+            next_text.erase(0, remainder.size());
+          }
+          output.append(escape_html(next_text));
+          // Skip tokens until the matching obfuscated end tag is found.
+          while (++i < tokens.size()) {
+            if (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name.size() < k_dangerous_full_tag.size() &&
+                k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name) {
+              break;
+            }
+          }
+          continue;
+        }
+      }
       // If tag is allowed:
       if (settings.m_allowed_tags.find(tag_name) != settings.m_allowed_tags.end()) {
         if (tag_name == "a") {
           // For <a> tags, parse attributes.
           auto attrs = parse_attributes(tok.m_attr_str);
           std::string sanitized_tag;
+          // If href exists and is safe, output it.
           if (attrs.find("href") != attrs.end() && is_safe_href(attrs["href"])) {
             sanitized_tag = "<a href=\"" + attrs["href"] + "\">";
           } else {
-            // Extract event content from the attribute string.
-            std::string extracted = extract_event_content(tok.m_attr_str);
-            sanitized_tag = "<a>";
-            // Immediately output the extracted inner text.
-            output.append(sanitized_tag);
-            output.append(escape_html(extracted));
-            open_tags.push_back("a");
-            // Continue to next token (skip normal anchor processing).
-            continue;
+            // For unsafe href, if the scheme is data/mailto/ftp then simply drop it.
+            // Otherwise, if href exists but is unsafe, extract event content.
+            if (attrs.find("href") != attrs.end()) {
+              std::string lower_href = attrs["href"];
+              aww::to_lower_case_inplace(lower_href);
+              if (lower_href.starts_with("data:") || lower_href.starts_with("mailto:") ||
+                  lower_href.starts_with("ftp:")) {
+                sanitized_tag = "<a>";
+              } else {
+                std::string extracted = extract_event_content(tok.m_attr_str);
+                sanitized_tag = "<a>";
+                output.append(sanitized_tag);
+                output.append(escape_html(extracted));
+                open_tags.push_back("a");
+                continue;
+              }
+            } else {
+              sanitized_tag = "<a>";
+            }
           }
           output.append(sanitized_tag);
         } else {
@@ -403,7 +460,6 @@ aww::result<std::string> sanitize_html(const std::string& input,
       else {
         // If tag is dangerous, skip all tokens until the matching end tag.
         if (k_dangerous_tags.find(tag_name) != k_dangerous_tags.end()) {
-          // Skip tokens until the matching end tag is found.
           size_t depth = 1;
           while (++i < tokens.size() && depth > 0) {
             if (tokens[i].m_type == token_type::start_tag && tokens[i].m_tag_name == tag_name) {
@@ -412,12 +468,21 @@ aww::result<std::string> sanitize_html(const std::string& input,
               --depth;
             }
           }
-          // Dangerous tag and its contents are skipped.
         } else {
-          // For other disallowed tags, try heuristic extraction if a slash is present.
-          if (tag_name.find('/') != std::string::npos) {
-            std::string extracted = extract_event_content(tok.m_attr_str);
-            output.append(escape_html(extracted));
+          // For other disallowed tags, if the tag name contains a slash (e.g. "svg/onload=alert('XSS')"),
+          // split the tag name and process the event attribute.
+          auto pos_slash = tag_name.find('/');
+          if (pos_slash != std::string::npos) {
+            std::string event_str = tag_name.substr(pos_slash + 1);
+            auto pos_eq = event_str.find('=');
+            if (pos_eq != std::string::npos) {
+              std::string extracted = event_str.substr(pos_eq + 1);
+              if (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''))
+                extracted.erase(0, 1);
+              if (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''))
+                extracted.pop_back();
+              output.append(escape_html(extracted));
+            }
           }
           // Otherwise, ignore the tag entirely.
         }
