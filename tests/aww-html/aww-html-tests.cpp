@@ -483,6 +483,269 @@ TEST_CASE("Valid input acceptance test #0:4 Inline - Nested Bold and Italic") {
   CHECK(result.value() == expected);
 }
 
+TEST_CASE("Valid input acceptance test #0:5 Inline - Multiple Inline Elements") {
+  std::string input =
+      R"HTML(<p><strong>Important</strong>, <u>underlined</u>, <s>strikethrough</s>, <sub>sub</sub>, <sup>sup</sup>, <small>small</small>, <mark>highlight</mark></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected =
+      R"HTML(<p><strong>Important</strong>, <u>underlined</u>, <s>strikethrough</s>, <sub>sub</sub>, <sup>sup</sup>, <small>small</small>, <mark>highlight</mark></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// Category 2: Block-Level Elements Test
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:6 Block - Paragraph") {
+  std::string input = R"HTML(<p>Paragraph text</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Paragraph text</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:7 Block - Headings") {
+  std::string input = R"HTML(<h1>Heading1</h1><h2>Heading2</h2>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<h1>Heading1</h1><h2>Heading2</h2>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:8 Block - Blockquote") {
+  std::string input = R"HTML(<blockquote>Quote text</blockquote>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<blockquote>Quote text</blockquote>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:9 Block - Preformatted Text") {
+  std::string input = R"HTML(<pre>Line1
+Line2</pre>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<pre>Line1
+Line2</pre>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:10 Block - HR and BR") {
+  std::string input = R"HTML(<hr><br>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<hr><br>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// Category 3: Lists Test
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:11 Lists - Unordered List") {
+  std::string input = R"HTML(<ul><li>Item1</li><li>Item2</li></ul>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<ul><li>Item1</li><li>Item2</li></ul>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:12 Lists - Ordered List") {
+  std::string input = R"HTML(<ol><li>First</li><li>Second</li></ol>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<ol><li>First</li><li>Second</li></ol>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:13 Lists - Description List") {
+  std::string input = R"HTML(<dl><dt>Term</dt><dd>Definition</dd></dl>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<dl><dt>Term</dt><dd>Definition</dd></dl>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:14 Lists - Mixed Inline in List") {
+  std::string input = R"HTML(<ul><li>Item <strong>Bold</strong></li></ul>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<ul><li>Item <strong>Bold</strong></li></ul>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:15 Lists - Nested Ordered List") {
+  std::string input = R"HTML(<ol><li>First</li><li>Second<ol><li>Subitem</li></ol></li></ol>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<ol><li>First</li><li>Second<ol><li>Subitem</li></ol></li></ol>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// Category 4: Mixed Structure Test
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:16 Mixed - Heading and Paragraph") {
+  std::string input = R"HTML(<h1>Title</h1><p>Paragraph with <b>bold</b> text.</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<h1>Title</h1><p>Paragraph with <b>bold</b> text.</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:17 Mixed - Heading with BR") {
+  std::string input = R"HTML(<h2>Heading</h2><p>Line1<br>Line2</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<h2>Heading</h2><p>Line1<br>Line2</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:18 Mixed - Paragraph with HR") {
+  std::string input = R"HTML(<p>Intro</p><hr><p>Outro</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Intro</p><hr><p>Outro</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:19 Mixed - Pre and Blockquote") {
+  std::string input = R"HTML(<pre>Code block</pre><blockquote>Quote</blockquote>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<pre>Code block</pre><blockquote>Quote</blockquote>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:20 Mixed - Subheading with Inline") {
+  std::string input = R"HTML(<h3>Subheading</h3><p>Text with <i>italic</i> and <u>underline</u>.</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<h3>Subheading</h3><p>Text with <i>italic</i> and <u>underline</u>.</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// Category 5: Nested Allowed Tags Test
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:21 Nested - Bold with Nested Italic") {
+  std::string input = R"HTML(<p>Nested <b>bold <i>italic</i> still bold</b> text.</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Nested <b>bold <i>italic</i> still bold</b> text.</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:22 Nested - Blockquote with Paragraph") {
+  std::string input = R"HTML(<blockquote><p>Quote with <em>emphasis</em></p></blockquote>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<blockquote><p>Quote with <em>emphasis</em></p></blockquote>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:23 Nested - Inline Quote with Citation") {
+  std::string input = R"HTML(<p><q>Inline quote <cite>Citation</cite></q></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p><q>Inline quote <cite>Citation</cite></q></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:24 Nested - Code with Keyboard Input") {
+  std::string input = R"HTML(<p><code>Code with <kbd>keyboard</kbd> input</code></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p><code>Code with <kbd>keyboard</kbd> input</code></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:25 Nested - Variable with Definition") {
+  std::string input = R"HTML(<p><var>Variable <dfn>Definition</dfn></var></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p><var>Variable <dfn>Definition</dfn></var></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// Category 6: Anchor Tag with Safe Href Test
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:26 Anchor - Simple HTTP") {
+  std::string input = R"HTML(<p>Visit <a href="http://example.com">Example</a>.</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Visit <a href="http://example.com">Example</a>.</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:27 Anchor - Simple HTTPS") {
+  std::string input = R"HTML(<p>Secure: <a href="https://secure.com">Secure</a></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Secure: <a href="https://secure.com">Secure</a></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:28 Anchor - Mixed Link") {
+  std::string input = R"HTML(<p>Mixed <a href="http://example.com">Link</a> text.</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Mixed <a href="http://example.com">Link</a> text.</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:29 Anchor - URL as Text") {
+  std::string input = R"HTML(<p><a href="http://example.com">http://example.com</a></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p><a href="http://example.com">http://example.com</a></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:30 Anchor - Standalone Anchor") {
+  std::string input = R"HTML(<a href="https://example.org">Example Org</a>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a href="https://example.org">Example Org</a>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// Category 7: Attribute Stripping Test for Allowed Tags
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:31 AttrStrip - Paragraph Extra Attributes") {
+  std::string input = R"HTML(<p class="text" style="color:red;">Paragraph</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Attributes are stripped from allowed tags.
+  std::string expected = R"HTML(<p>Paragraph</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:32 AttrStrip - Bold Extra Attributes") {
+  std::string input = R"HTML(<b id="bold1" data-custom="abc">Bold</b>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<b>Bold</b>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:33 AttrStrip - Abbr with Title and Onclick") {
+  std::string input = R"HTML(<abbr title="explanation" onclick="alert(1)">abbr</abbr>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<abbr>abbr</abbr>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:34 AttrStrip - Cite with Style") {
+  std::string input = R"HTML(<cite style="font-style:normal;">Citation</cite>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<cite>Citation</cite>)HTML";
+  CHECK(result.value() == expected);
+}
+
 TEST_CASE("Valid input acceptance test #0:35 AttrStrip - Mixed Inline with Extra Attributes") {
   std::string input = R"HTML(<p><em data-info="info">Emphasis</em> and <q class="quote">quote</q></p>)HTML";
   auto result = aww::sanitize_html(input);
@@ -490,7 +753,3 @@ TEST_CASE("Valid input acceptance test #0:35 AttrStrip - Mixed Inline with Extra
   std::string expected = R"HTML(<p><em>Emphasis</em> and <q>quote</q></p>)HTML";
   CHECK(result.value() == expected);
 }
-
-//------------------------------------------------------------------------------
-// End of Category 1: Inline Formatting Combination Test
-//------------------------------------------------------------------------------
