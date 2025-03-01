@@ -2,9 +2,9 @@
 #define AWW_HTML_HPP
 
 /**
- * 2025-02-26
- * WARNING: This is very naive implementation of HTML sanitization.
- * Written by GPT-o3-mini-high
+ * 2025-02-26 (Updated 2025-03-01)
+ * WARNING: This is a naive implementation of HTML sanitization.
+ * Updated by GPT-o3-mini-high with improvements.
  */
 
 #include <algorithm>
@@ -21,11 +21,21 @@
 
 namespace aww {
 
-/// Set of block-level tags.
-const std::unordered_set<std::string> block_level_tags{"h1", "h2", "h3", "h4", "h5", "h6", "p"};
+// Settings for HTML sanitization.
+struct sanitize_html_settings {
+  std::unordered_set<std::string> allowed_tags;
+  std::unordered_set<std::string> block_level_tags;
+  std::unordered_set<std::string> inline_tags;
+};
 
-/// Set of inline tags.
-const std::unordered_set<std::string> inline_tags{"b", "i", "em", "strong", "a"};
+// Default settings: allowed tags are "h1", "h2", "h3", "h4", "h5", "h6", "p", "b", "i", "em", "strong", "a".
+const sanitize_html_settings default_sanitize_html_settings{
+    /* allowed_tags */
+    std::unordered_set<std::string>{"h1", "h2", "h3", "h4", "h5", "h6", "p", "b", "i", "em", "strong", "a"},
+    /* block_level_tags */
+    std::unordered_set<std::string>{"h1", "h2", "h3", "h4", "h5", "h6", "p"},
+    /* inline_tags */
+    std::unordered_set<std::string>{"b", "i", "em", "strong", "a"}};
 
 /**
  * @brief Escapes HTML special characters in plain text. (aww tag #4v11pr9oe5v)
@@ -144,18 +154,19 @@ std::string sanitize_a_attributes(const std::string& attr_str) {
  *
  * Processes the input string, preserving only allowed tags and attributes,
  * stripping out disallowed content, auto-closing tags as needed, and handling
- * malformed or obfuscated markup.
+ * malformed markup.
  *
  * Now also strips all HTML comments.
  *
  * @param input The UTF‑8 encoded HTML string.
+ * @param settings The sanitization settings.
  * @return aww::result<std::string> containing the sanitized HTML.
  */
-aww::result<std::string> sanitize_html(const std::string& input) {
+aww::result<std::string> sanitize_html(const std::string& input,
+                                       const sanitize_html_settings& settings = default_sanitize_html_settings) {
   std::string output;
   size_t pos = 0;
   std::vector<std::string> open_tags;
-  bool last_tag_obfuscated = false;
 
   while (pos < input.size()) {
     // If a comment starts here, skip it entirely.
@@ -177,12 +188,8 @@ aww::result<std::string> sanitize_html(const std::string& input) {
         break;
       }
       std::string tag_content = input.substr(pos + 1, gt_pos - pos - 1);
-      // If tag content contains an inner '<', treat it as obfuscated.
-      if (tag_content.find('<') != std::string::npos) {
-        last_tag_obfuscated = true;
-        pos = gt_pos + 1;
-        continue;
-      }
+      // Removed brittle obfuscated tag handling.
+
       bool is_end_tag = false;
       if (!tag_content.empty() && tag_content[0] == '/') {
         is_end_tag = true;
@@ -196,17 +203,16 @@ aww::result<std::string> sanitize_html(const std::string& input) {
         tag_name.pop_back();
       std::string lower_tag = aww::to_lower_case(tag_name);
 
-      const std::unordered_set<std::string> allowed_tags{"h1", "h2", "h3", "h4", "h5",     "h6",
-                                                         "p",  "b",  "i",  "em", "strong", "a"};
-      if (allowed_tags.find(lower_tag) != allowed_tags.end()) {
+      if (settings.allowed_tags.find(lower_tag) != settings.allowed_tags.end()) {
         if (is_end_tag) {
           if (!open_tags.empty() && open_tags.back() == lower_tag) {
             output.append("</" + lower_tag + ">");
             open_tags.pop_back();
           }
         } else {
-          if (block_level_tags.find(lower_tag) != block_level_tags.end()) {
-            while (!open_tags.empty() && block_level_tags.find(open_tags.back()) != block_level_tags.end()) {
+          if (settings.block_level_tags.find(lower_tag) != settings.block_level_tags.end()) {
+            while (!open_tags.empty() &&
+                   settings.block_level_tags.find(open_tags.back()) != settings.block_level_tags.end()) {
               output.append("</" + open_tags.back() + ">");
               open_tags.pop_back();
             }
@@ -266,13 +272,8 @@ aww::result<std::string> sanitize_html(const std::string& input) {
         text_chunk = input.substr(pos, next_lt - pos);
         pos = next_lt;
       }
-      if (last_tag_obfuscated) {
-        std::string prefix = "ipt>";
-        if (text_chunk.rfind(prefix, 0) == 0)
-          text_chunk = text_chunk.substr(prefix.size());
-        last_tag_obfuscated = false;
-      }
-      if (!open_tags.empty() && inline_tags.find(open_tags.back()) != inline_tags.end()) {
+      // Removed obsolete obfuscated tag adjustment.
+      if (!open_tags.empty() && settings.inline_tags.find(open_tags.back()) != settings.inline_tags.end()) {
         if (!text_chunk.empty() && text_chunk.back() == ')')
           text_chunk.pop_back();
       }
@@ -287,4 +288,5 @@ aww::result<std::string> sanitize_html(const std::string& input) {
 }
 
 } // namespace aww
+
 #endif // AWW_HTML_HPP
