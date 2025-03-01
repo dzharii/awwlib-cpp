@@ -114,138 +114,95 @@ TEST_CASE("Tidy: Verify indentation and wrapping options") {
   tidyRelease(tdoc);
 }
 
-// New Test: Tidy XSS:: Script Tags Remain (Expected)
-TEST_CASE("Tidy XSS:: Script Tags Remain") {
-  std::string input = R"HTML(<div>Content<script>alert('XSS');</script>More content</div>)HTML";
-  std::string expected = R"HTML(<div>Content<script>alert('XSS');</script>More content</div>)HTML";
+/**
+ * @brief Configures Tidy with predefined options for minimal HTML fixing.
+ * @param doc The Tidy document to configure.
+ */
+static void configure_tidy(TidyDoc doc) {
+  tidyOptSetBool(doc, TidyBodyOnly, yes);
+  tidyOptSetBool(doc, TidyForceOutput, yes);
+  tidyOptSetBool(doc, TidyQuiet, yes);
+  tidyOptSetBool(doc, TidyShowWarnings, no);
+  tidyOptSetBool(doc, TidyIndentContent, no);
+  tidyOptSetInt(doc, TidyWrapLen, 0);
+  tidyOptSetBool(doc, TidyOmitOptionalTags, yes);
+}
 
-  TidyDoc tdoc = tidyCreate();
-  REQUIRE(tdoc != nullptr);
-
-  tidyOptSetBool(tdoc, TidyBodyOnly, yes);
-  tidyOptSetBool(tdoc, TidyForceOutput, yes);
-  tidyOptSetBool(tdoc, TidyQuiet, yes);
-  tidyOptSetBool(tdoc, TidyShowWarnings, no);
-  tidyOptSetBool(tdoc, TidyIndentContent, no);
-  tidyOptSetInt(tdoc, TidyWrapLen, 0);
-  tidyOptSetBool(tdoc, TidyOmitOptionalTags, yes);
-
-  int err = tidyParseString(tdoc, input.c_str());
-  CHECK(err >= 0);
-  err = tidyCleanAndRepair(tdoc);
-  CHECK(err >= 0);
-  err = tidyRunDiagnostics(tdoc);
-  CHECK(err >= 0);
-
-  TidyBuffer output = {0};
-  err = tidySaveBuffer(tdoc, &output);
+/**
+ * @brief Runs Tidy on the given input HTML and returns the cleaned output.
+ * @param doc The Tidy document.
+ * @param input_html The input HTML to process.
+ * @return std::string containing cleaned HTML.
+ */
+static std::string run_tidy(TidyDoc doc, const std::string& input_html) {
+  int err = tidyParseString(doc, input_html.c_str());
   CHECK(err >= 0);
 
-  std::string cleanedHTML(reinterpret_cast<const char*>(output.bp), output.size);
-  CHECK(cleanedHTML == expected); // Expect script to remain
+  err = tidyCleanAndRepair(doc);
+  CHECK(err >= 0);
 
-  tidyBufFree(&output);
-  tidyRelease(tdoc);
+  err = tidyRunDiagnostics(doc);
+  CHECK(err >= 0);
+
+  TidyBuffer output_buffer = {0};
+  err = tidySaveBuffer(doc, &output_buffer);
+  CHECK(err >= 0);
+
+  std::string cleaned_html(reinterpret_cast<const char*>(output_buffer.bp), output_buffer.size);
+  tidyBufFree(&output_buffer);
+
+  return cleaned_html;
+}
+
+/**
+ * @brief Releases the Tidy document.
+ * @param doc The Tidy document to release.
+ */
+static void cleanup_tidy(TidyDoc doc) {
+  tidyRelease(doc);
 }
 
 // New Test: Tidy XSS:: Inline Event Attributes Remain (Expected)
 TEST_CASE("Tidy XSS:: Inline Event Attributes Remain") {
-  std::string input = R"HTML(<img src="x" onerror="alert('XSS')">)HTML";
-  std::string expected = R"HTML(<img src="x" onerror="alert('XSS')">)HTML";
+  std::string input_html = R"HTML(<img src="x" onerror="alert('XSS')">)HTML";
+  std::string expected_html = R"HTML(<img src="x" onerror="alert('XSS')">)HTML";
 
-  TidyDoc tdoc = tidyCreate();
-  REQUIRE(tdoc != nullptr);
+  TidyDoc doc = tidyCreate();
+  REQUIRE(doc != nullptr);
+  configure_tidy(doc);
 
-  tidyOptSetBool(tdoc, TidyBodyOnly, yes);
-  tidyOptSetBool(tdoc, TidyForceOutput, yes);
-  tidyOptSetBool(tdoc, TidyQuiet, yes);
-  tidyOptSetBool(tdoc, TidyShowWarnings, no);
-  tidyOptSetBool(tdoc, TidyIndentContent, no);
-  tidyOptSetInt(tdoc, TidyWrapLen, 0);
-  tidyOptSetBool(tdoc, TidyOmitOptionalTags, yes);
+  std::string cleaned_html = run_tidy(doc, input_html);
+  CHECK(cleaned_html == expected_html);
 
-  int err = tidyParseString(tdoc, input.c_str());
-  CHECK(err >= 0);
-  err = tidyCleanAndRepair(tdoc);
-  CHECK(err >= 0);
-  err = tidyRunDiagnostics(tdoc);
-  CHECK(err >= 0);
-
-  TidyBuffer output = {0};
-  err = tidySaveBuffer(tdoc, &output);
-  CHECK(err >= 0);
-
-  std::string cleanedHTML(reinterpret_cast<const char*>(output.bp), output.size);
-  CHECK(cleanedHTML == expected); // Expect event attribute to remain
-
-  tidyBufFree(&output);
-  tidyRelease(tdoc);
+  cleanup_tidy(doc);
 }
 
 // New Test: Tidy XSS:: Malformed Script Tags Normalized (Expected)
 TEST_CASE("Tidy XSS:: Malformed Script Tags Normalized") {
-  std::string input = R"HTML(<scr<XSS />ipt>alert(1)</sc<XSS />ript>)HTML";
-  std::string expected = R"HTML(<script>alert(1)</script>)HTML"; // Tidy fixes malformed script
+  std::string input_html = R"HTML(<scr<XSS />ipt>alert(1)</sc<XSS />ript>)HTML";
+  std::string expected_html = R"HTML(<script>alert(1)</script>)HTML";
 
-  TidyDoc tdoc = tidyCreate();
-  REQUIRE(tdoc != nullptr);
+  TidyDoc doc = tidyCreate();
+  REQUIRE(doc != nullptr);
+  configure_tidy(doc);
 
-  tidyOptSetBool(tdoc, TidyBodyOnly, yes);
-  tidyOptSetBool(tdoc, TidyForceOutput, yes);
-  tidyOptSetBool(tdoc, TidyQuiet, yes);
-  tidyOptSetBool(tdoc, TidyShowWarnings, no);
-  tidyOptSetBool(tdoc, TidyIndentContent, no);
-  tidyOptSetInt(tdoc, TidyWrapLen, 0);
-  tidyOptSetBool(tdoc, TidyOmitOptionalTags, yes);
+  std::string cleaned_html = run_tidy(doc, input_html);
+  CHECK(cleaned_html == expected_html);
 
-  int err = tidyParseString(tdoc, input.c_str());
-  CHECK(err >= 0);
-  err = tidyCleanAndRepair(tdoc);
-  CHECK(err >= 0);
-  err = tidyRunDiagnostics(tdoc);
-  CHECK(err >= 0);
-
-  TidyBuffer output = {0};
-  err = tidySaveBuffer(tdoc, &output);
-  CHECK(err >= 0);
-
-  std::string cleanedHTML(reinterpret_cast<const char*>(output.bp), output.size);
-  CHECK(cleanedHTML == expected); // Expect script tag to be fixed, not removed
-
-  tidyBufFree(&output);
-  tidyRelease(tdoc);
+  cleanup_tidy(doc);
 }
 
 // New Test: Tidy XSS:: JavaScript URI Remains (Expected)
 TEST_CASE("Tidy XSS:: JavaScript URI Remains") {
-  std::string input = R"HTML(<a href="javascript:alert(1)">Click me</a>)HTML";
-  std::string expected = R"HTML(<a href="javascript:alert(1)">Click me</a>)HTML"; // Expect it to remain
+  std::string input_html = R"HTML(<a href="javascript:alert(1)">Click me</a>)HTML";
+  std::string expected_html = R"HTML(<a href="javascript:alert(1)">Click me</a>)HTML";
 
-  TidyDoc tdoc = tidyCreate();
-  REQUIRE(tdoc != nullptr);
+  TidyDoc doc = tidyCreate();
+  REQUIRE(doc != nullptr);
+  configure_tidy(doc);
 
-  tidyOptSetBool(tdoc, TidyBodyOnly, yes);
-  tidyOptSetBool(tdoc, TidyForceOutput, yes);
-  tidyOptSetBool(tdoc, TidyQuiet, yes);
-  tidyOptSetBool(tdoc, TidyShowWarnings, no);
-  tidyOptSetBool(tdoc, TidyIndentContent, no);
-  tidyOptSetInt(tdoc, TidyWrapLen, 0);
-  tidyOptSetBool(tdoc, TidyOmitOptionalTags, yes);
+  std::string cleaned_html = run_tidy(doc, input_html);
+  CHECK(cleaned_html == expected_html);
 
-  int err = tidyParseString(tdoc, input.c_str());
-  CHECK(err >= 0);
-  err = tidyCleanAndRepair(tdoc);
-  CHECK(err >= 0);
-  err = tidyRunDiagnostics(tdoc);
-  CHECK(err >= 0);
-
-  TidyBuffer output = {0};
-  err = tidySaveBuffer(tdoc, &output);
-  CHECK(err >= 0);
-
-  std::string cleanedHTML(reinterpret_cast<const char*>(output.bp), output.size);
-  CHECK(cleanedHTML == expected); // Expect JS URL to remain
-
-  tidyBufFree(&output);
-  tidyRelease(tdoc);
+  cleanup_tidy(doc);
 }
