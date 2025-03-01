@@ -2,6 +2,15 @@
 
 
 
+## 2025-03-01 
+
+Plan: 
+
+1. libtidy will fix HTML and make it more xml parser friendly, it won't remove XSS
+2. New html sanitizer will potentially use dom based xml parser to remove/cleanup the tags and sanitize output. 
+
+
+
 ## 2025-02-27 Late night libtidy!
 
 Included libtidy!
