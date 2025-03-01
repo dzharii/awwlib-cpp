@@ -2,6 +2,14 @@
 
 
 
+## 2025-03-01
+
+`sanitize_html` was wild change. It is somewhat stable, but I need to review the current tests
+
+- [ ] 🚩`sanitize_html` review the sanitizer tests
+
+
+
 ## 2025-03-01 
 
 Plan: 
