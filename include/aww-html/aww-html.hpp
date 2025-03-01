@@ -425,9 +425,11 @@ aww::result<std::string> sanitize_html(const std::string& input,
       break;
     case token_type::start_tag: {
       std::string tag_name = tok.m_tag_name;
-      // Check if the tag is an obfuscated dangerous tag prefix (e.g., part of "script").
-      bool is_obfuscated_dangerous_start_tag = (tag_name.size() < k_dangerous_full_tag.size() &&
-                                                k_dangerous_full_tag.substr(0, tag_name.size()) == tag_name);
+      // Only treat the tag as potentially dangerous if it is not allowed.
+      bool is_obfuscated_dangerous_start_tag =
+          (settings.m_allowed_tags.find(tag_name) == settings.m_allowed_tags.end() &&
+           tag_name.size() < k_dangerous_full_tag.size() &&
+           k_dangerous_full_tag.substr(0, tag_name.size()) == tag_name);
       if (is_obfuscated_dangerous_start_tag) {
         std::string remainder = std::string(k_dangerous_full_tag).substr(tag_name.size());
         if (i + 1 < tokens.size() && tokens[i + 1].m_type == token_type::text) {
@@ -437,10 +439,11 @@ aww::result<std::string> sanitize_html(const std::string& input,
             next_text.erase(0, remainder.size());
           output.append(escape_html(next_text));
           while (++i < tokens.size()) {
-            // Check if token is an obfuscated dangerous end tag (closing tag with a name that is a prefix of "script").
+            // Check if token is an obfuscated dangerous end tag and not allowed.
             bool is_obfuscated_dangerous_end_tag =
                 (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name.size() < k_dangerous_full_tag.size() &&
-                 k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name);
+                 k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name &&
+                 (settings.m_allowed_tags.find(tokens[i].m_tag_name) == settings.m_allowed_tags.end()));
             if (is_obfuscated_dangerous_end_tag)
               break;
           }
