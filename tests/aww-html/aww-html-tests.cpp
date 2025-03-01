@@ -445,3 +445,52 @@ TEST_CASE("mganss::HtmlSanitizer test #26: HTML Comment with Embedded Script") {
   std::string expected = R"HTML(<p>Hello  World</p>)HTML";
   CHECK(result.value() == expected);
 }
+
+// 2025-03-01
+//------------------------------------------------------------------------------
+// Category 1: Inline Formatting Combination Test
+//------------------------------------------------------------------------------
+TEST_CASE("Valid input acceptance test #0:1 Inline - Simple Bold") {
+  std::string input = R"HTML(<b>Bold</b>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<b>Bold</b>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:2 Inline - Italic and Emphasis") {
+  std::string input = R"HTML(<p><i>Italic</i> and <em>emphasized</em> text</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p><i>Italic</i> and <em>emphasized</em> text</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:3 Inline - Abbreviation with Title") {
+  std::string input = R"HTML(<abbr title="explanation">abbr</abbr>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  // Note: attributes are stripped.
+  std::string expected = R"HTML(<abbr>abbr</abbr>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:4 Inline - Nested Bold and Italic") {
+  std::string input = R"HTML(<p>Nested <b>bold <i>italic</i></b> text</p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Nested <b>bold <i>italic</i></b> text</p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+TEST_CASE("Valid input acceptance test #0:35 AttrStrip - Mixed Inline with Extra Attributes") {
+  std::string input = R"HTML(<p><em data-info="info">Emphasis</em> and <q class="quote">quote</q></p>)HTML";
+  auto result = aww::sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p><em>Emphasis</em> and <q>quote</q></p>)HTML";
+  CHECK(result.value() == expected);
+}
+
+//------------------------------------------------------------------------------
+// End of Category 1: Inline Formatting Combination Test
+//------------------------------------------------------------------------------

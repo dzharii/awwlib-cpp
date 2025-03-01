@@ -105,14 +105,23 @@ struct sanitize_html_settings {
 
 /**
  * @brief Default settings for HTML sanitization.
+ *
+ * The allowed tags now include a wide range of text formatting elements, block-level content,
+ * and list elements.
  */
 const sanitize_html_settings default_sanitize_html_settings{
     /* m_allowed_tags */
-    std::unordered_set<std::string>{"h1", "h2", "h3", "h4", "h5", "h6", "p", "b", "i", "em", "strong", "a"},
+    std::unordered_set<std::string>{"h1",   "h2",  "h3",  "h4",   "h5",  "h6",    "p",    "blockquote", "pre",    "hr",
+                                    "br",   "ul",  "ol",  "li",   "dl",  "dt",    "dd",   "b",          "strong", "i",
+                                    "em",   "u",   "s",   "sub",  "sup", "small", "mark", "abbr",       "cite",   "q",
+                                    "code", "kbd", "var", "time", "dfn", "bdi",   "bdo",  "a"},
     /* m_block_level_tags */
-    std::unordered_set<std::string>{"h1", "h2", "h3", "h4", "h5", "h6", "p"},
+    std::unordered_set<std::string>{"h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "pre", "hr", "br", "ul",
+                                    "ol", "li", "dl", "dt", "dd"},
     /* m_inline_tags */
-    std::unordered_set<std::string>{"b", "i", "em", "strong", "a"}};
+    std::unordered_set<std::string>{"b",   "strong", "i",    "em",   "u",    "s",   "sub",
+                                    "sup", "small",  "mark", "abbr", "cite", "q",   "code",
+                                    "kbd", "var",    "time", "dfn",  "bdi",  "bdo", "a"}};
 
 //------------------------------------------------------------------------------
 // Utility: HTML Escaping
@@ -422,7 +431,6 @@ aww::result<std::string> sanitize_html(const std::string& input,
             sanitized_tag = "<a href=\"" + attrs["href"] + "\">";
           } else {
             // For unsafe href, if the scheme is data/mailto/ftp then simply drop it.
-            // Otherwise, if href exists but is unsafe, extract event content.
             if (attrs.find("href") != attrs.end()) {
               std::string lower_href = attrs["href"];
               aww::to_lower_case_inplace(lower_href);
