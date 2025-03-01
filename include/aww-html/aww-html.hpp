@@ -47,6 +47,9 @@ static const std::unordered_set<std::string> k_dangerous_tags{"script", "iframe"
 // Set of void (self-closing) elements.
 static const std::unordered_set<std::string> k_void_elements{"br", "hr", "img"};
 
+// Set of allowed protocols for href attributes.
+static const std::unordered_set<std::string> k_allowed_protocols{"http:", "https:"};
+
 //------------------------------------------------------------------------------
 // Utility: Minimal Escaping for Unclosed Tags
 //------------------------------------------------------------------------------
@@ -315,7 +318,12 @@ bool is_safe_href(const std::string& href) {
   std::string trimmed = href;
   trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r"));
   aww::to_lower_case_inplace(trimmed);
-  return trimmed.starts_with(k_http_prefix) || trimmed.starts_with(k_https_prefix);
+  for (const auto& protocol : k_allowed_protocols) {
+    if (trimmed.starts_with(protocol)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -430,10 +438,10 @@ aww::result<std::string> sanitize_html(const std::string& input,
             if (attrs.find("href") != attrs.end()) {
               std::string lower_href = attrs["href"];
               aww::to_lower_case_inplace(lower_href);
-              if (lower_href.starts_with("data:") || lower_href.starts_with("mailto:") ||
-                  lower_href.starts_with("ftp:"))
+              if (k_allowed_protocols.find(lower_href.substr(0, lower_href.find(':') + 1)) ==
+                  k_allowed_protocols.end()) {
                 sanitized_tag = "<a>";
-              else {
+              } else {
                 std::string extracted = extract_event_content(tok.m_attr_str);
                 sanitized_tag = "<a>";
                 output.append(sanitized_tag);

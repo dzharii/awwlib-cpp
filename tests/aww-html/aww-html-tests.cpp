@@ -68,7 +68,7 @@ TEST_CASE("Test Case 8: Encoded JavaScript in Anchor") {
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
   // Unsafe href remains in the anchor content.
-  std::string expected = R"HTML(<a>jav&amp;#x09;ascript:alert(1)Click me</a>)HTML";
+  std::string expected = R"HTML(<a>Click me</a>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -128,7 +128,7 @@ TEST_CASE("Example 1: Mixed Valid and Invalid Content") {
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
   // In this case, the unsafe href remains in the anchor text.
-  std::string expected = R"HTML(<p>Hello, <b>world</b>!  Welcome to <a>javascript:alert(1)our site</a>.</p>)HTML";
+  std::string expected = R"HTML(<p>Hello, <b>world</b>!  Welcome to <a>our site</a>.</p>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -146,8 +146,7 @@ TEST_CASE("Test Case 15: Numeric Character Reference in Anchor") {
       R"HTML(<a href="&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;:alert(1)">Click me</a>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected =
-      R"HTML(<a>&amp;#x6A;&amp;#x61;&amp;#x76;&amp;#x61;&amp;#x73;&amp;#x63;&amp;#x72;&amp;#x69;&amp;#x70;&amp;#x74;:alert(1)Click me</a>)HTML";
+  std::string expected = R"HTML(<a>Click me</a>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -174,7 +173,7 @@ TEST_CASE("Test Case 18: Mixed Case <A> Tag with JavaScript Scheme") {
   std::string input = R"HTML(<A HREF="JaVaScRiPt:alert(1)">Test</A>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<a>JaVaScRiPt:alert(1)Test</a>)HTML";
+  std::string expected = R"HTML(<a>Test</a>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -241,7 +240,7 @@ TEST_CASE("mganss::HtmlSanitizer test #1: XSS Locator Test") {
   std::string input = R"HTML(<a href="'';!--"<XSS>=&{()}">)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<a>'';!--&quot;&lt;XSS=&amp;{()}&quot;&gt;</a>)HTML";
+  std::string expected = R"HTML(<a>=&amp;{()}&quot;&gt;</a>)HTML";
   CHECK(result.value() == expected);
 }
 
@@ -322,7 +321,7 @@ TEST_CASE("mganss::HtmlSanitizer test #11: Anchor with javascript href") {
   std::string input = R"HTML(<A HREF="javascript:alert(1)">XSS</A>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<a>javascript:alert(1)XSS</a>)HTML";
+  std::string expected = R"HTML(<a>XSS</a>)HTML";
   CHECK(result.value() == expected);
 }
 
