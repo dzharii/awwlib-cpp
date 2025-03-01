@@ -169,7 +169,6 @@ std::string escape_html(const std::string& text) {
 //------------------------------------------------------------------------------
 // 1. Tokenization: State Machine Parser
 //------------------------------------------------------------------------------
-
 /**
  * @brief Tokenizes HTML input into a vector of tokens.
  *
@@ -180,10 +179,12 @@ std::vector<token> tokenize_html(std::string_view input) {
   std::vector<token> tokens;
   size_t pos = 0;
   while (pos < input.size()) {
-    // Handle CDATA sections by skipping them entirely.
-    if (input.substr(pos, k_cdata_start.size()) == k_cdata_start) {
+    // Check if current position marks the start of a CDATA section.
+    bool is_cdata_start = (input.substr(pos, k_cdata_start.size()) == k_cdata_start);
+    if (is_cdata_start) {
       size_t end_cdata = input.find(k_cdata_end, pos + k_cdata_start.size());
-      if (end_cdata == std::string_view::npos) {
+      bool no_cdata_end_found = (end_cdata == std::string_view::npos);
+      if (no_cdata_end_found) {
         pos = input.size();
         continue;
       } else {
@@ -191,11 +192,15 @@ std::vector<token> tokenize_html(std::string_view input) {
         continue;
       }
     }
-    if (input[pos] == '<') {
+    // Process tag or text based on the current character.
+    bool is_tag_start = (input[pos] == '<');
+    if (is_tag_start) {
       // Check for comment.
-      if (input.substr(pos, k_comment_start.size()) == k_comment_start) {
+      bool is_comment = (input.substr(pos, k_comment_start.size()) == k_comment_start);
+      if (is_comment) {
         size_t end_comment = input.find(k_comment_end, pos + k_comment_start.size());
-        if (end_comment == std::string_view::npos) {
+        bool comment_not_closed = (end_comment == std::string_view::npos);
+        if (comment_not_closed) {
           tokens.push_back({token_type::comment, std::string(input.substr(pos)), "", "", false});
           break;
         } else {
@@ -206,17 +211,15 @@ std::vector<token> tokenize_html(std::string_view input) {
           continue;
         }
       }
-      // Determine if it's an end tag.
-      bool is_end_tag = false;
+      // Determine if this tag is an end tag.
       size_t tag_start = pos + 1;
-      if (tag_start < input.size() && input[tag_start] == '/') {
-        is_end_tag = true;
+      bool is_end_tag = (tag_start < input.size() && input[tag_start] == '/');
+      if (is_end_tag)
         ++tag_start;
-      }
       // Find closing '>'.
       size_t tag_end = input.find('>', pos);
-      if (tag_end == std::string_view::npos) {
-        // Unclosed tag: minimally escape and mark token as unclosed.
+      bool is_tag_unclosed = (tag_end == std::string_view::npos);
+      if (is_tag_unclosed) {
         tokens.push_back({token_type::text, escape_unclosed(std::string(input.substr(pos))), "", "", true});
         break;
       }
@@ -238,7 +241,8 @@ std::vector<token> tokenize_html(std::string_view input) {
     } else {
       // Process text until next '<'
       size_t next_tag = input.find('<', pos);
-      if (next_tag == std::string_view::npos)
+      bool no_next_tag_found = (next_tag == std::string_view::npos);
+      if (no_next_tag_found)
         next_tag = input.size();
       std::string text = std::string(input.substr(pos, next_tag - pos));
       tokens.push_back({token_type::text, text, "", "", false});
@@ -251,7 +255,6 @@ std::vector<token> tokenize_html(std::string_view input) {
 //------------------------------------------------------------------------------
 // 2. Robust Attribute Parsing: Mini-Parser
 //------------------------------------------------------------------------------
-
 /**
  * @brief Parses an attribute string into a map of attribute name-value pairs.
  *
@@ -264,7 +267,8 @@ std::map<std::string, std::string> parse_attributes(const std::string& attr_str)
   while (pos < attr_str.size()) {
     while (pos < attr_str.size() && std::isspace(static_cast<unsigned char>(attr_str[pos])))
       ++pos;
-    if (pos >= attr_str.size())
+    bool reached_end_of_attr_str = (pos >= attr_str.size());
+    if (reached_end_of_attr_str)
       break;
     size_t name_start = pos;
     while (pos < attr_str.size() && !std::isspace(static_cast<unsigned char>(attr_str[pos])) && attr_str[pos] != '=')
@@ -274,16 +278,19 @@ std::map<std::string, std::string> parse_attributes(const std::string& attr_str)
     while (pos < attr_str.size() && std::isspace(static_cast<unsigned char>(attr_str[pos])))
       ++pos;
     std::string value;
-    if (pos < attr_str.size() && attr_str[pos] == '=') {
+    bool has_equal_sign = (pos < attr_str.size() && attr_str[pos] == '=');
+    if (has_equal_sign) {
       ++pos;
       while (pos < attr_str.size() && std::isspace(static_cast<unsigned char>(attr_str[pos])))
         ++pos;
-      if (pos < attr_str.size() && (attr_str[pos] == '"' || attr_str[pos] == '\'')) {
+      bool has_quote = (pos < attr_str.size() && (attr_str[pos] == '"' || attr_str[pos] == '\''));
+      if (has_quote) {
         char quote = attr_str[pos];
         ++pos;
         size_t value_start = pos;
         size_t value_end = attr_str.find(quote, pos);
-        if (value_end != std::string::npos) {
+        bool quote_found = (value_end != std::string::npos);
+        if (quote_found) {
           value = attr_str.substr(value_start, value_end - value_start);
           pos = value_end + 1;
         } else {
@@ -307,7 +314,6 @@ std::map<std::string, std::string> parse_attributes(const std::string& attr_str)
 //------------------------------------------------------------------------------
 // Helper: Safe Href Check
 //------------------------------------------------------------------------------
-
 /**
  * @brief Determines if an href value is safe.
  *
@@ -319,7 +325,8 @@ bool is_safe_href(const std::string& href) {
   trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r"));
   aww::to_lower_case_inplace(trimmed);
   for (const auto& protocol : k_allowed_protocols) {
-    if (trimmed.starts_with(protocol)) {
+    bool starts_with_protocol = trimmed.starts_with(protocol);
+    if (starts_with_protocol) {
       return true;
     }
   }
@@ -338,34 +345,39 @@ bool is_safe_href(const std::string& href) {
  * @return The extracted content, or an empty string if not found.
  */
 std::string extract_event_content(const std::string& attr_str) {
-  // First, try to find a slash.
   auto pos_slash = attr_str.find('/');
   std::string extracted;
   if (pos_slash != std::string::npos) {
+    // Found a slash; try to extract attribute after it.
     std::string potential_attr = attr_str.substr(pos_slash + 1);
     auto pos_eq = potential_attr.find('=');
     if (pos_eq != std::string::npos) {
       extracted = potential_attr.substr(pos_eq + 1);
-      if (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''))
+      bool starts_with_quote = (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''));
+      if (starts_with_quote)
         extracted.erase(0, 1);
-      if (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''))
+      bool ends_with_quote = (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''));
+      if (ends_with_quote)
         extracted.pop_back();
     }
   } else {
-    // Fallback: if no slash, look for '=' and return text after it.
+    // Fallback: no slash found, look for '=' in the string.
     auto pos_eq = attr_str.find('=');
     if (pos_eq != std::string::npos) {
       extracted = attr_str.substr(pos_eq + 1);
-      if (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''))
+      bool starts_with_quote = (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''));
+      if (starts_with_quote)
         extracted.erase(0, 1);
-      if (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''))
+      bool ends_with_quote = (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''));
+      if (ends_with_quote)
         extracted.pop_back();
     }
   }
   // Remove trailing "&quot;&gt;" if present.
   std::string trailer = "&quot;&gt;";
-  if (extracted.size() >= trailer.size() &&
-      extracted.compare(extracted.size() - trailer.size(), trailer.size(), trailer) == 0) {
+  bool has_trailer = (extracted.size() >= trailer.size() &&
+                      extracted.compare(extracted.size() - trailer.size(), trailer.size(), trailer) == 0);
+  if (has_trailer) {
     extracted.erase(extracted.size() - trailer.size());
   }
   return extracted;
@@ -395,12 +407,15 @@ aww::result<std::string> sanitize_html(const std::string& input,
     const token& tok = tokens[i];
     switch (tok.m_type) {
     case token_type::text: {
-      if (tok.m_unclosed) {
+      bool is_token_unclosed = tok.m_unclosed;
+      if (is_token_unclosed) {
         output.append(tok.m_content);
       } else {
         std::string text = tok.m_content;
-        if (!open_tags.empty() && settings.m_inline_tags.find(open_tags.back()) != settings.m_inline_tags.end() &&
-            !text.empty() && text.back() == ')')
+        bool is_inside_inline_tag =
+            (!open_tags.empty() && settings.m_inline_tags.find(open_tags.back()) != settings.m_inline_tags.end());
+        bool text_ends_with_closing_paren = (!text.empty() && text.back() == ')');
+        if (is_inside_inline_tag && text_ends_with_closing_paren)
           text.pop_back();
         output.append(escape_html(text));
       }
@@ -410,36 +425,46 @@ aww::result<std::string> sanitize_html(const std::string& input,
       break;
     case token_type::start_tag: {
       std::string tag_name = tok.m_tag_name;
-      // Special handling for obfuscated dangerous tags.
-      if (tag_name.size() < k_dangerous_full_tag.size() &&
-          k_dangerous_full_tag.substr(0, tag_name.size()) == tag_name) {
+      // Check if the tag is an obfuscated dangerous tag prefix (e.g., part of "script").
+      bool is_obfuscated_dangerous_start_tag = (tag_name.size() < k_dangerous_full_tag.size() &&
+                                                k_dangerous_full_tag.substr(0, tag_name.size()) == tag_name);
+      if (is_obfuscated_dangerous_start_tag) {
         std::string remainder = std::string(k_dangerous_full_tag).substr(tag_name.size());
         if (i + 1 < tokens.size() && tokens[i + 1].m_type == token_type::text) {
           std::string next_text = tokens[i + 1].m_content;
-          if (next_text.find(remainder) == 0)
+          bool remainder_at_start = (next_text.find(remainder) == 0);
+          if (remainder_at_start)
             next_text.erase(0, remainder.size());
           output.append(escape_html(next_text));
           while (++i < tokens.size()) {
-            if (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name.size() < k_dangerous_full_tag.size() &&
-                k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name)
+            // Check if token is an obfuscated dangerous end tag (closing tag with a name that is a prefix of "script").
+            bool is_obfuscated_dangerous_end_tag =
+                (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name.size() < k_dangerous_full_tag.size() &&
+                 k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name);
+            if (is_obfuscated_dangerous_end_tag)
               break;
           }
           continue;
         }
       }
       // Allowed tag branch.
-      if (settings.m_allowed_tags.find(tag_name) != settings.m_allowed_tags.end()) {
-        if (tag_name == "a") {
+      bool is_allowed_tag = (settings.m_allowed_tags.find(tag_name) != settings.m_allowed_tags.end());
+      if (is_allowed_tag) {
+        bool is_anchor = (tag_name == "a");
+        if (is_anchor) {
           auto attrs = parse_attributes(tok.m_attr_str);
           std::string sanitized_tag;
-          if (attrs.find("href") != attrs.end() && is_safe_href(attrs["href"])) {
+          bool has_href = (attrs.find("href") != attrs.end());
+          bool safe_href = (has_href && is_safe_href(attrs["href"]));
+          if (safe_href) {
             sanitized_tag = "<a href=\"" + attrs["href"] + "\">";
           } else {
-            if (attrs.find("href") != attrs.end()) {
+            if (has_href) {
               std::string lower_href = attrs["href"];
               aww::to_lower_case_inplace(lower_href);
-              if (k_allowed_protocols.find(lower_href.substr(0, lower_href.find(':') + 1)) ==
-                  k_allowed_protocols.end()) {
+              std::string protocol_substring = lower_href.substr(0, lower_href.find(':') + 1);
+              bool protocol_not_allowed = (k_allowed_protocols.find(protocol_substring) == k_allowed_protocols.end());
+              if (protocol_not_allowed) {
                 sanitized_tag = "<a>";
               } else {
                 std::string extracted = extract_event_content(tok.m_attr_str);
@@ -454,14 +479,13 @@ aww::result<std::string> sanitize_html(const std::string& input,
             }
           }
           output.append(sanitized_tag);
-          // For anchors, always push.
+          // For anchors, always push the tag.
           open_tags.push_back(tag_name);
         } else {
-          // For void elements, output tag and do not push.
-          if (k_void_elements.find(tag_name) != k_void_elements.end()) {
+          bool is_void_element = (k_void_elements.find(tag_name) != k_void_elements.end());
+          if (is_void_element) {
             output.append("<" + tag_name + ">");
           } else {
-            // In preserve_structure mode, do not auto-close.
             output.append("<" + tag_name + ">");
             open_tags.push_back(tag_name);
           }
@@ -469,24 +493,31 @@ aww::result<std::string> sanitize_html(const std::string& input,
       }
       // Disallowed tag branch.
       else {
-        if (k_dangerous_tags.find(tag_name) != k_dangerous_tags.end()) {
+        bool is_dangerous_tag = (k_dangerous_tags.find(tag_name) != k_dangerous_tags.end());
+        if (is_dangerous_tag) {
           size_t depth = 1;
           while (++i < tokens.size() && depth > 0) {
-            if (tokens[i].m_type == token_type::start_tag && tokens[i].m_tag_name == tag_name)
+            bool is_same_start_tag = (tokens[i].m_type == token_type::start_tag && tokens[i].m_tag_name == tag_name);
+            bool is_same_end_tag = (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name == tag_name);
+            if (is_same_start_tag)
               ++depth;
-            else if (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name == tag_name)
+            else if (is_same_end_tag)
               --depth;
           }
         } else {
           auto pos_slash = tag_name.find('/');
-          if (pos_slash != std::string::npos) {
+          bool contains_slash = (pos_slash != std::string::npos);
+          if (contains_slash) {
             std::string event_str = tag_name.substr(pos_slash + 1);
             auto pos_eq = event_str.find('=');
-            if (pos_eq != std::string::npos) {
+            bool contains_equal = (pos_eq != std::string::npos);
+            if (contains_equal) {
               std::string extracted = event_str.substr(pos_eq + 1);
-              if (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''))
+              bool starts_with_quote = (!extracted.empty() && (extracted.front() == '"' || extracted.front() == '\''));
+              if (starts_with_quote)
                 extracted.erase(0, 1);
-              if (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''))
+              bool ends_with_quote = (!extracted.empty() && (extracted.back() == '"' || extracted.back() == '\''));
+              if (ends_with_quote)
                 extracted.pop_back();
               output.append(escape_html(extracted));
             }
@@ -497,7 +528,9 @@ aww::result<std::string> sanitize_html(const std::string& input,
     }
     case token_type::end_tag: {
       std::string tag_name = tok.m_tag_name;
-      if (!open_tags.empty() && open_tags.back() == tag_name) {
+      bool has_open_tags = (!open_tags.empty());
+      bool top_tag_matches = (has_open_tags && open_tags.back() == tag_name);
+      if (top_tag_matches) {
         output.append("</" + tag_name + ">");
         open_tags.pop_back();
       }
@@ -506,8 +539,11 @@ aww::result<std::string> sanitize_html(const std::string& input,
     }
   }
   while (!open_tags.empty()) {
-    output.append("</" + open_tags.back() + ">");
-    open_tags.pop_back();
+    bool open_tags_not_empty = (!open_tags.empty());
+    if (open_tags_not_empty) {
+      output.append("</" + open_tags.back() + ">");
+      open_tags.pop_back();
+    }
   }
   return aww::result<std::string>::ok(output);
 }
