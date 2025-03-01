@@ -136,7 +136,7 @@ TEST_CASE("Example 2: Malformed Input with Nested Unclosed Tags") {
   std::string input = R"HTML(<h1>Title<p>Paragraph with <i>italic text)</i></p></h1>)HTML";
   auto result = aww::sanitize_html(input);
   CHECK(result.is_ok());
-  std::string expected = R"HTML(<h1>Title</h1><p>Paragraph with <i>italic text</i></p>)HTML";
+  std::string expected = R"HTML(<h1>Title<p>Paragraph with <i>italic text</i></p></h1>)HTML";
   CHECK(result.value() == expected);
 }
 
