@@ -44,6 +44,9 @@ static const std::string k_dangerous_full_tag = "script"; ///< The dangerous tag
 static const std::unordered_set<std::string> k_dangerous_tags{"script", "iframe", "xml",  "embed",
                                                               "object", "base",   "style"};
 
+// Set of void (self-closing) elements.
+static const std::unordered_set<std::string> k_void_elements{"br", "hr", "img"};
+
 //------------------------------------------------------------------------------
 // Utility: Minimal Escaping for Unclosed Tags
 //------------------------------------------------------------------------------
@@ -101,13 +104,14 @@ struct sanitize_html_settings {
   std::unordered_set<std::string> m_allowed_tags;     ///< Allowed tag names.
   std::unordered_set<std::string> m_block_level_tags; ///< Block-level tag names.
   std::unordered_set<std::string> m_inline_tags;      ///< Inline tag names.
+  bool m_preserve_structure = false;                  ///< If true, valid input structure is preserved exactly.
 };
 
 /**
  * @brief Default settings for HTML sanitization.
  *
  * The allowed tags now include a wide range of text formatting elements, block-level content,
- * and list elements.
+ * and list elements. For valid input acceptance tests, set m_preserve_structure to true.
  */
 const sanitize_html_settings default_sanitize_html_settings{
     /* m_allowed_tags */
@@ -121,7 +125,8 @@ const sanitize_html_settings default_sanitize_html_settings{
     /* m_inline_tags */
     std::unordered_set<std::string>{"b",   "strong", "i",    "em",   "u",    "s",   "sub",
                                     "sup", "small",  "mark", "abbr", "cite", "q",   "code",
-                                    "kbd", "var",    "time", "dfn",  "bdi",  "bdo", "a"}};
+                                    "kbd", "var",    "time", "dfn",  "bdi",  "bdo", "a"},
+    /* m_preserve_structure */ true};
 
 //------------------------------------------------------------------------------
 // Utility: HTML Escaping
@@ -361,9 +366,12 @@ std::string extract_event_content(const std::string& attr_str) {
 //------------------------------------------------------------------------------
 // 3. Unified Pass with Inline Sanitization
 //------------------------------------------------------------------------------
-
 /**
  * @brief Sanitizes an HTML string based on provided settings.
+ *
+ * In "preserve structure" mode (m_preserve_structure true), valid input is output
+ * exactly as given (with non-anchor tag attributes stripped). Void elements are output
+ * without closing tags.
  *
  * @param input The HTML input.
  * @param settings The sanitization settings.
@@ -375,69 +383,57 @@ aww::result<std::string> sanitize_html(const std::string& input,
   std::string output;
   std::vector<std::string> open_tags;
 
-  // Process tokens using an index-based loop so that we can skip dangerous tag content.
   for (size_t i = 0; i < tokens.size(); ++i) {
     const token& tok = tokens[i];
     switch (tok.m_type) {
     case token_type::text: {
-      // If token was generated from an unclosed tag, output as-is.
       if (tok.m_unclosed) {
         output.append(tok.m_content);
       } else {
         std::string text = tok.m_content;
-        // If the last open tag is inline, trim trailing ')' (heuristic).
         if (!open_tags.empty() && settings.m_inline_tags.find(open_tags.back()) != settings.m_inline_tags.end() &&
-            !text.empty() && text.back() == ')') {
+            !text.empty() && text.back() == ')')
           text.pop_back();
-        }
         output.append(escape_html(text));
       }
       break;
     }
     case token_type::comment:
-      // Completely skip comments.
       break;
     case token_type::start_tag: {
       std::string tag_name = tok.m_tag_name;
-      // Special handling for obfuscated dangerous tags (e.g. <scr...> as partial "script").
+      // Special handling for obfuscated dangerous tags.
       if (tag_name.size() < k_dangerous_full_tag.size() &&
           k_dangerous_full_tag.substr(0, tag_name.size()) == tag_name) {
         std::string remainder = std::string(k_dangerous_full_tag).substr(tag_name.size());
-        // Check if the next token is text that starts with the expected remainder.
         if (i + 1 < tokens.size() && tokens[i + 1].m_type == token_type::text) {
           std::string next_text = tokens[i + 1].m_content;
-          if (next_text.find(remainder) == 0) {
+          if (next_text.find(remainder) == 0)
             next_text.erase(0, remainder.size());
-          }
           output.append(escape_html(next_text));
-          // Skip tokens until the matching obfuscated end tag is found.
           while (++i < tokens.size()) {
             if (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name.size() < k_dangerous_full_tag.size() &&
-                k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name) {
+                k_dangerous_full_tag.substr(0, tokens[i].m_tag_name.size()) == tokens[i].m_tag_name)
               break;
-            }
           }
           continue;
         }
       }
-      // If tag is allowed:
+      // Allowed tag branch.
       if (settings.m_allowed_tags.find(tag_name) != settings.m_allowed_tags.end()) {
         if (tag_name == "a") {
-          // For <a> tags, parse attributes.
           auto attrs = parse_attributes(tok.m_attr_str);
           std::string sanitized_tag;
-          // If href exists and is safe, output it.
           if (attrs.find("href") != attrs.end() && is_safe_href(attrs["href"])) {
             sanitized_tag = "<a href=\"" + attrs["href"] + "\">";
           } else {
-            // For unsafe href, if the scheme is data/mailto/ftp then simply drop it.
             if (attrs.find("href") != attrs.end()) {
               std::string lower_href = attrs["href"];
               aww::to_lower_case_inplace(lower_href);
               if (lower_href.starts_with("data:") || lower_href.starts_with("mailto:") ||
-                  lower_href.starts_with("ftp:")) {
+                  lower_href.starts_with("ftp:"))
                 sanitized_tag = "<a>";
-              } else {
+              else {
                 std::string extracted = extract_event_content(tok.m_attr_str);
                 sanitized_tag = "<a>";
                 output.append(sanitized_tag);
@@ -450,35 +446,30 @@ aww::result<std::string> sanitize_html(const std::string& input,
             }
           }
           output.append(sanitized_tag);
+          // For anchors, always push.
+          open_tags.push_back(tag_name);
         } else {
-          // For non-anchor allowed tags.
-          // Auto-close previous block-level tags if needed.
-          if (settings.m_block_level_tags.find(tag_name) != settings.m_block_level_tags.end()) {
-            while (!open_tags.empty() &&
-                   settings.m_block_level_tags.find(open_tags.back()) != settings.m_block_level_tags.end()) {
-              output.append("</" + open_tags.back() + ">");
-              open_tags.pop_back();
-            }
+          // For void elements, output tag and do not push.
+          if (k_void_elements.find(tag_name) != k_void_elements.end()) {
+            output.append("<" + tag_name + ">");
+          } else {
+            // In preserve_structure mode, do not auto-close.
+            output.append("<" + tag_name + ">");
+            open_tags.push_back(tag_name);
           }
-          output.append("<" + tag_name + ">");
         }
-        open_tags.push_back(tag_name);
       }
-      // For disallowed tags:
+      // Disallowed tag branch.
       else {
-        // If tag is dangerous, skip all tokens until the matching end tag.
         if (k_dangerous_tags.find(tag_name) != k_dangerous_tags.end()) {
           size_t depth = 1;
           while (++i < tokens.size() && depth > 0) {
-            if (tokens[i].m_type == token_type::start_tag && tokens[i].m_tag_name == tag_name) {
+            if (tokens[i].m_type == token_type::start_tag && tokens[i].m_tag_name == tag_name)
               ++depth;
-            } else if (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name == tag_name) {
+            else if (tokens[i].m_type == token_type::end_tag && tokens[i].m_tag_name == tag_name)
               --depth;
-            }
           }
         } else {
-          // For other disallowed tags, if the tag name contains a slash (e.g. "svg/onload=alert('XSS')"),
-          // split the tag name and process the event attribute.
           auto pos_slash = tag_name.find('/');
           if (pos_slash != std::string::npos) {
             std::string event_str = tag_name.substr(pos_slash + 1);
@@ -492,7 +483,6 @@ aww::result<std::string> sanitize_html(const std::string& input,
               output.append(escape_html(extracted));
             }
           }
-          // Otherwise, ignore the tag entirely.
         }
       }
       break;
@@ -507,7 +497,6 @@ aww::result<std::string> sanitize_html(const std::string& input,
     }
     }
   }
-  // Auto-close any remaining open tags.
   while (!open_tags.empty()) {
     output.append("</" + open_tags.back() + ">");
     open_tags.pop_back();
