@@ -11,7 +11,7 @@
     "scripts"
   ],
   "keywords": ["pandoc", "installer", "wrapper"],
-  "author": "Your Name",
+  "author": "2025-03-01",
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^2.6.1",

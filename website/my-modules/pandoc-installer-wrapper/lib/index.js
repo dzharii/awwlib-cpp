@@ -18,7 +18,7 @@ const fs = require('fs');
 function getPandocPath() {
   // Use __dirname to base the location relative to the module folder.
   const baseDir = path.join(__dirname, '..');
-  const binDir = path.join(baseDir, 'pandoc-bin');
+  const binDir = path.join(baseDir, 'pandoc-bin', `pandoc-3.6.3`);
   let binaryName = 'pandoc';
   if (process.platform === 'win32') {
     binaryName += '.exe';
