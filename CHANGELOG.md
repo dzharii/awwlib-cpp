@@ -9,6 +9,30 @@ added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for 
 `sanitize_html` was wild change. It is somewhat stable, but I need to review the current tests
 
 - [ ] 🚩`sanitize_html` review the sanitizer tests
+- [ ] 🚩 found good sample for `sanitize_html`  [zino/phoenix/bin/sanitizer/sanitizer.cpp at 4deb77948e7485bf0caa9601941780fd64bacae2 · dionyziz/zino](https://github.com/dionyziz/zino/blob/4deb77948e7485bf0caa9601941780fd64bacae2/phoenix/bin/sanitizer/sanitizer.cpp) { github.com }
+
+```cpp
+    TidyDoc tdoc = tidyCreate(); // initialize
+
+    tidyOptSetInt( tdoc, TidyIndentContent, 0 );
+    tidyOptSetInt( tdoc, TidyWrapLen, 0 );
+    tidyOptSetValue( tdoc, TidyAltText, "" );
+    tidyOptSetValue( tdoc, TidyCharEncoding, "utf8" );
+    tidyOptSetBool( tdoc, TidyXhtmlOut, yes );
+    tidyOptSetBool( tdoc, TidyHideComments, yes );
+    tidyOptSetInt( tdoc, TidyBodyOnly, yes );
+    tidyOptSetBool( tdoc, TidyMakeClean, yes );
+    tidyOptSetBool( tdoc, TidyLogicalEmphasis, yes );
+    tidyOptSetBool( tdoc, TidyDropPropAttrs, yes );
+    tidyOptSetBool( tdoc, TidyDropFontTags, yes );
+    tidyOptSetBool( tdoc, TidyDropEmptyParas, yes );
+    tidyOptSetBool( tdoc, TidyQuoteMarks, yes );
+    tidyOptSetBool( tdoc, TidyQuoteAmpersand, yes );
+    tidyOptSetBool( tdoc, TidyForceOutput, yes );
+    tidyOptSetBool( tdoc, TidyEscapeCdata, yes );
+    tidyOptSetBool( tdoc, TidyJoinClasses, yes );
+    // tidyOptSetBool( tdoc, TidyOutputBOM, no );
+```
 
 
 

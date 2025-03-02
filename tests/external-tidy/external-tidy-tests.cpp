@@ -21,6 +21,7 @@ TEST_CASE("Tidy: Clean malformed HTML and produce valid output") {
   tidyOptSetBool(tdoc, TidyQuiet, yes);
   // Disable warnings if not needed.
   tidyOptSetBool(tdoc, TidyShowWarnings, no);
+  tidyOptSetInt(tdoc, TidyIndentContent, 0);
 
   // Example of malformed HTML.
   const char* inputHTML = "<html><body><p>Unclosed paragraph";
@@ -59,6 +60,7 @@ TEST_CASE("Tidy: Check option behavior and error buffering") {
   // Enable error buffering.
   tidyOptSetBool(tdoc, TidyForceOutput, yes);
   tidyOptSetBool(tdoc, TidyQuiet, yes);
+  tidyOptSetInt(tdoc, TidyIndentContent, 0);
 
   // Allocate an error buffer and tell Tidy to use it.
   TidyBuffer errbuf = {};
@@ -90,8 +92,7 @@ TEST_CASE("Tidy: Verify indentation and wrapping options") {
   tidyOptSetBool(tdoc, TidyForceOutput, yes);
   tidyOptSetBool(tdoc, TidyQuiet, yes);
   tidyOptSetBool(tdoc, TidyShowWarnings, no);
-  // Set options for indenting and wrapping.
-  tidyOptSetBool(tdoc, TidyIndentContent, yes);
+  tidyOptSetInt(tdoc, TidyIndentContent, 0);
   tidyOptSetInt(tdoc, TidyWrapLen, 80);
 
   const char* inputHTML = "<html><body><p>Some very long text that should be wrapped according to the wrap length "
@@ -124,7 +125,7 @@ static void configure_tidy(TidyDoc doc) {
   tidyOptSetBool(doc, TidyForceOutput, yes);
   tidyOptSetBool(doc, TidyQuiet, yes);
   tidyOptSetBool(doc, TidyShowWarnings, no);
-  tidyOptSetBool(doc, TidyIndentContent, no);
+  tidyOptSetInt(doc, TidyIndentContent, 0);
   tidyOptSetInt(doc, TidyWrapLen, 0);
   tidyOptSetBool(doc, TidyOmitOptionalTags, yes);
 }
