@@ -4,6 +4,8 @@
 
 ## 2025-03-01
 
+added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for pandoc. Planning to use org files which will be converted to markdown. the goal is to use Emacs for maintaining the library documentation -- just for fun! But with the profit of some extended syntax, like includes. 
+
 `sanitize_html` was wild change. It is somewhat stable, but I need to review the current tests
 
 - [ ] 🚩`sanitize_html` review the sanitizer tests
