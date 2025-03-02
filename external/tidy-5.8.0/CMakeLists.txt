@@ -191,11 +191,11 @@ endif ()
 #   Setup other compiler-specific and platform-specific compiler flags.
 #------------------------------------------------------------------------
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set( WARNING_FLAGS -Wall )
+    set( WARNING_FLAGS -Wall -Wno-error)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang") 
-   set( WARNING_FLAGS "-Wall -Wno-overloaded-virtual" )
+   set( WARNING_FLAGS "-Wall -Wno-overloaded-virtual -Wno-error" )
 endif() 
 
 if(WIN32 AND MSVC)
