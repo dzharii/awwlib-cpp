@@ -57,8 +57,8 @@ if (LIBTIDY_VERSION)
     set(TIDY_SO_VERSION "${TIDY_MAJOR_VERSION}${TIDY_MINOR_VERSION}")
 else ()
     message(FATAL_ERROR "*** FAILED to get a VERSION from version.txt!")
-endif ()   
- 
+endif ()
+
 # Establish version date
 if (LIBTIDY_DATE)
     string(REPLACE "." ";" DATE_LIST ${LIBTIDY_DATE})
@@ -161,24 +161,24 @@ option( ENABLE_MEMORY_DEBUG "Set ON to output some memory diagnostics."     OFF 
 
 if ( ENABLE_DEBUG_LOG )
     add_definitions( -DENABLE_DEBUG_LOG )
-    message(STATUS "*** Debug Logging is enabled.")  
+    message(STATUS "*** Debug Logging is enabled.")
 else ()
-    message(STATUS "*** Debug Logging is NOT enabled.")  
+    message(STATUS "*** Debug Logging is NOT enabled.")
 endif ()
 
 if (ENABLE_ALLOC_DEBUG)
     add_definitions ( -DDEBUG_ALLOCATION )  # see lexer.c for details
     message(STATUS "*** Note, lexer.c node allocation diagnostics are ON")
 endif ()
-    
+
 if (ENABLE_MEMORY_DEBUG)
     add_definitions ( -DDEBUG_MEMORY )  # see alloc.c for details
     message(STATUS "*** Note, alloc.c memory diagnostics are ON")
 endif ()
-    
+
 if (WIN32)
     option( ENABLE_CRTDBG_MEMORY "Set ON to enable the Windows CRT debug library." OFF )
-    
+
     if (ENABLE_CRTDBG_MEMORY)
         add_definitions ( -D_CRTDBG_MAP_ALLOC )  # see tidy.c for details
         message(STATUS "*** Note, tidy.c Windows CRT memory debug is ON")
@@ -191,12 +191,12 @@ endif ()
 #   Setup other compiler-specific and platform-specific compiler flags.
 #------------------------------------------------------------------------
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set( WARNING_FLAGS -Wall -Wno-error)
+    set( WARNING_FLAGS "-Wall -Wno-error")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang") 
-   set( WARNING_FLAGS "-Wall -Wno-overloaded-virtual -Wno-error" )
-endif() 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+   set( WARNING_FLAGS "-Wall -Wno-error -Wno-overloaded-virtual" )
+endif()
 
 if(WIN32 AND MSVC)
     # C4996: The compiler encountered a deprecated declaration.
@@ -206,8 +206,8 @@ if(WIN32 AND MSVC)
     foreach(warning 4996 4090 4244 4267)
         set(WARNING_FLAGS "${WARNING_FLAGS} /wd${warning}")
     endforeach()
-    
-    set( MSVC_FLAGS "-DNOMINMAX -D_USE_MATH_DEFINES -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -D__CRT_NONSTDC_NO_WARNINGS" )
+
+    set( MSVC_FLAGS "-DNOMINMAX -D_USE_MATH_DEFINES -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -D__CRT_NONSTDC_NO_WARNINGS /WX-" )
 
     # to distinguish between debug and release lib in windows
     set( CMAKE_DEBUG_POSTFIX "d" ) # little effect in unix
@@ -222,7 +222,7 @@ set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MSVC_LD_FLAGS}" )
 
 #------------------------------------------------------------------------
 # Static Windows Runtime
-#   Option to statically link to the Windows runtime. Maybe only 
+#   Option to statically link to the Windows runtime. Maybe only
 #   applies to WIN32/MSVC.
 #------------------------------------------------------------------------
 if (MSVC)
@@ -238,7 +238,7 @@ if (MSVC)
             )
         foreach(CompilerFlag ${CompilerFlags})
             string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-        endforeach()    
+        endforeach()
         message(STATUS "Using /MT STATIC runtime")
     else ()
         message(STATUS "Using /MD DYNAMIC runtime")
@@ -271,14 +271,14 @@ if (NO_ACCESS_SUPPORT)
 endif ()
 
 # Delete me? Not used in Tidy source!
-add_definitions ( -DHAVE_CONFIG_H ) 
+add_definitions ( -DHAVE_CONFIG_H )
 
 
 #------------------------------------------------------------------------
 # Runtime Configuration File Support
 #   By default on Unix-like systems when building for the console program,
 #   support runtime configuration files in /etc/ and in ~/. To prevent this,
-#   set ENABLE_CONFIG_FILES to NO. Specify -DTIDY_CONFIG_FILE and/or 
+#   set ENABLE_CONFIG_FILES to NO. Specify -DTIDY_CONFIG_FILE and/or
 #   -DTIDY_USER_CONFIG_FILE to override the default paths in tidyplatform.h.
 # @note: this section refactored to support #584.
 #------------------------------------------------------------------------
@@ -292,11 +292,11 @@ if ( UNIX AND SUPPORT_CONSOLE_APP )
 else ()
 
   option ( ENABLE_CONFIG_FILES "Set to ON to enable Tidy runtime configuration file support" OFF )
-  
+
   if ( SUPPORT_GETPWNAM )
     add_definitions( -DSUPPORT_GETPWNAM=1 )
   endif ()
-  
+
 endif ()
 
 if ( ENABLE_CONFIG_FILES )
@@ -304,7 +304,7 @@ if ( ENABLE_CONFIG_FILES )
     message(STATUS "*** Building support for runtime configuration files.")
 
     add_definitions( -DTIDY_ENABLE_CONFIG_FILES )
-    
+
     # define a default here so we can pass to XSL.
     if ( NOT TIDY_CONFIG_FILE )
         set( TIDY_CONFIG_FILE "/etc/tidy.conf" )
@@ -320,7 +320,7 @@ if ( ENABLE_CONFIG_FILES )
     add_definitions( -DTIDY_USER_CONFIG_FILE="${TIDY_USER_CONFIG_FILE}" )
 
 endif ()
-  
+
 
 #------------------------------------------------------------------------
 # Shared Library
@@ -357,7 +357,7 @@ set ( CFILES
         ${SRCDIR}/tmbstr.c       ${SRCDIR}/utf8.c         ${SRCDIR}/tidylib.c
         ${SRCDIR}/mappedio.c     ${SRCDIR}/gdoc.c         ${SRCDIR}/language.c
         ${SRCDIR}/messageobj.c   ${SRCDIR}/sprtf.c )
-        
+
 set ( HFILES
         ${INCDIR}/tidyplatform.h ${INCDIR}/tidy.h         ${INCDIR}/tidyenum.h
         ${INCDIR}/tidybuffio.h )
@@ -375,7 +375,7 @@ set ( LIBHFILES
         ${SRCDIR}/tmbstr.h       ${SRCDIR}/utf8.h         ${SRCDIR}/tidy-int.h
         ${SRCDIR}/version.h      ${SRCDIR}/gdoc.h         ${SRCDIR}/language.h
         ${SRCDIR}/language_en.h  ${SRCDIR}/sprtf.h )
-  
+
 
 #------------------------------------------------------------------------
 # Target Locations
@@ -400,16 +400,16 @@ endif ()
 set(name tidy-static)
 add_library ( ${name} STATIC ${CFILES} ${HFILES} ${LIBHFILES} )
 if (WIN32)
-    set_target_properties( ${name} PROPERTIES 
-                           OUTPUT_NAME ${LIB_NAME}_static ) 
+    set_target_properties( ${name} PROPERTIES
+                           OUTPUT_NAME ${LIB_NAME}_static )
 else ()
-    set_target_properties( ${name} PROPERTIES 
+    set_target_properties( ${name} PROPERTIES
                            OUTPUT_NAME ${LIB_NAME} )
 
 endif ()
 if (NOT TIDY_CONSOLE_SHARED) # user wants default static linkage
     list ( APPEND add_LIBS ${name} )
-endif ()    
+endif ()
 install(TARGETS ${name}
         RUNTIME DESTINATION ${BIN_INSTALL_DIR}
         ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
@@ -432,13 +432,13 @@ if (BUILD_SHARED_LIB)
         set(CMAKE_MACOSX_RPATH 1)
     endif ()
     add_library ( ${name} SHARED ${CFILES} ${HFILES} ${LIBHFILES} )
-    set_target_properties( ${name} PROPERTIES 
+    set_target_properties( ${name} PROPERTIES
                                    OUTPUT_NAME ${LIB_NAME} )
     set_target_properties( ${name} PROPERTIES
                                    VERSION   ${LIBTIDY_VERSION}
                                    SOVERSION ${TIDY_SO_VERSION}
                                    NO_SONAME ${NO_SONAME} )
-    set_target_properties( ${name} PROPERTIES 
+    set_target_properties( ${name} PROPERTIES
                                    COMPILE_FLAGS "-DBUILD_SHARED_LIB -DBUILDING_SHARED_LIB")
     install(TARGETS ${name}
         RUNTIME DESTINATION ${BIN_INSTALL_DIR}
@@ -447,7 +447,7 @@ if (BUILD_SHARED_LIB)
         )
     if (TIDY_CONSOLE_SHARED) # user wants shared/dll linkage
         list ( APPEND add_LIBS ${name} )
-    endif ()    
+    endif ()
 endif ()
 
 
@@ -467,13 +467,13 @@ if (SUPPORT_CONSOLE_APP)
     if (APPLE)
         string(TIMESTAMP CURRENT_YEAR "%Y")
         configure_file(
-            ${CMAKE_CURRENT_SOURCE_DIR}/console/Info.plist.in 
+            ${CMAKE_CURRENT_SOURCE_DIR}/console/Info.plist.in
             ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
         )
         target_link_options(${name} PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist)
     endif ()
     if (NOT TIDY_CONSOLE_SHARED)
-        set_target_properties( ${name} PROPERTIES 
+        set_target_properties( ${name} PROPERTIES
                                        COMPILE_FLAGS "-DTIDY_STATIC" )
     endif ()
     install (TARGETS ${name} DESTINATION bin)
@@ -519,13 +519,13 @@ if (UNIX AND SUPPORT_CONSOLE_APP)
         set(TIDYHELP ${CMAKE_CURRENT_BINARY_DIR}/tidy-help.xml)
         set(TIDYCONFIG ${CMAKE_CURRENT_BINARY_DIR}/tidy-config.xml)
         add_custom_target(man ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}")
-        
+
         ## Populate the @VARIABLES@ in the input file.
         configure_file(
             ${CMAKE_CURRENT_SOURCE_DIR}/man/tidy1.xsl.in
             ${TIDY1XSL}
         )
- 
+
         # Run the built EXE to generate xml output .
         add_custom_command(
             TARGET man
@@ -573,7 +573,7 @@ endif()
 
 #------------------------------------------------------------------------
 # System Runtime Libraries
-#   Need to ensure that system DLLs get included in a binary 
+#   Need to ensure that system DLLs get included in a binary
 #   distribution, but since it can miss some - seems incomplete - make
 #   optional.
 #------------------------------------------------------------------------
@@ -694,7 +694,7 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}.pc"
     @ONLY
     )
-    
+
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}.pc"
     DESTINATION "${LIB_INSTALL_DIR}/pkgconfig"
