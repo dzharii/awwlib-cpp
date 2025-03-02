@@ -84,3 +84,33 @@ TEST_CASE("to_lower_case_inplace") {
   aww::to_lower_case_inplace(str4);
   CHECK(str4 == "");
 }
+
+TEST_CASE("string_remove_all_whitespaces - Empty String") {
+  std::string input = "";
+  std::string expected = "";
+  CHECK(aww::string_remove_all_whitespaces(input) == expected);
+}
+
+TEST_CASE("string_remove_all_whitespaces - No Whitespace Present") {
+  std::string input = "HelloWorld!";
+  std::string expected = "HelloWorld!";
+  CHECK(aww::string_remove_all_whitespaces(input) == expected);
+}
+
+TEST_CASE("string_remove_all_whitespaces - String with Only Spaces") {
+  std::string input = "   ";
+  std::string expected = "";
+  CHECK(aww::string_remove_all_whitespaces(input) == expected);
+}
+
+TEST_CASE("string_remove_all_whitespaces - Mixed Whitespace Characters") {
+  std::string input = "  Hello\tWorld \nTest\nCase  ";
+  std::string expected = "HelloWorldTestCase";
+  CHECK(aww::string_remove_all_whitespaces(input) == expected);
+}
+
+TEST_CASE("string_remove_all_whitespaces - Complex Sentence") {
+  std::string input = "   The quick brown fox  jumps over\t the lazy dog.\n";
+  std::string expected = "Thequickbrownfoxjumpsoverthelazydog.";
+  CHECK(aww::string_remove_all_whitespaces(input) == expected);
+}

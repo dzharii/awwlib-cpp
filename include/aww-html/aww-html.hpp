@@ -3,7 +3,7 @@
 
 /**
  * @file aww_html.hpp
- * @brief Provides HTML sanitization via tokenization, robust attribute parsing, and unified processing.
+ * @brief Provides HTML sanitization via tokenization, attribute parsing, and unified processing.
  *
  * This header tokenizes HTML input, parses attributes with a mini‐parser, and produces sanitized HTML.
  * It implements additional heuristics for dangerous/disallowed tags.
@@ -18,6 +18,8 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <tidy.h>
+#include <tidybuffio.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -27,6 +29,162 @@
 #include "aww-string/aww-string.hpp"
 
 namespace aww {
+
+//------------------------------------------------------------------------------
+// HTML Tidy
+//-----------------------------------------
+
+/**
+ * @brief Sanitizes the input HTML string using the Tidy library. (aww tag #wra83i2gpmi)
+ *
+ * This function cleans, repairs, and reformats the provided HTML input.
+ *
+ * @note Credit: Original function source code can be found at:
+ *       https://github.com/dionyziz/zino/blob/4deb77948e7485bf0caa9601941780fd64bacae2/phoenix/bin/sanitizer/sanitizer.cpp
+ *
+ * @param html_input The raw HTML string to be sanitized.
+ * @return aww::result<std::string> On success, returns the sanitized HTML string; on failure, returns an error message.
+ */
+aww::result<std::string> tidy_sanitize_html(const std::string& html_input) {
+  // Initialize buffers for output and error messages.
+  TidyBuffer output_buffer = {0};
+  TidyBuffer error_buffer = {0};
+
+  // Create a new Tidy document.
+  TidyDoc tidy_doc = tidyCreate();
+  if (!tidy_doc) {
+    return aww::result<std::string>::err("#psrr1dz0mzs Failed to create Tidy document.");
+  }
+
+  // Configure Tidy options:
+  // (The following comments provide minimal visual examples for each configuration.)
+
+  // Disable extra indentation.
+  // Example: <div><p>Text</p></div> remains unchanged (no extra newlines/whitespace added).
+  tidyOptSetInt(tidy_doc, TidyIndentContent, 0);
+
+  // Disable automatic line wrapping.
+  // Example: A long line remains a single unbroken line.
+  tidyOptSetInt(tidy_doc, TidyWrapLen, 0);
+
+  // Set alternative text for images to an empty string.
+  // Example: <img src="image.png"> becomes <img src="image.png" alt="">
+  tidyOptSetValue(tidy_doc, TidyAltText, "");
+
+  // Set output character encoding to UTF-8.
+  // Example: Ensures all characters in the output are UTF-8 encoded.
+  tidyOptSetValue(tidy_doc, TidyCharEncoding, "utf8");
+
+  // Produce XHTML-compliant output.
+  // Example: <br> is converted to <br />.
+  tidyOptSetBool(tidy_doc, TidyXhtmlOut, yes);
+
+  // Hide HTML comments.
+  // Example: <!-- Comment --> is removed from the output.
+  tidyOptSetBool(tidy_doc, TidyHideComments, yes);
+
+  // Output only the content inside the <body> tag.
+  // Example: Returns only <p>Content</p> if wrapped in full HTML structure.
+  tidyOptSetInt(tidy_doc, TidyBodyOnly, yes);
+
+  // Remove redundant and non-semantic markup.
+  // Example: Fixes common HTML errors without adding extra presentation.
+  tidyOptSetBool(tidy_doc, TidyMakeClean, yes);
+
+  // Convert <i> and <b> tags to semantic <em> and <strong> tags.
+  // Example: <i>text</i> becomes <em>text</em>.
+  tidyOptSetBool(tidy_doc, TidyLogicalEmphasis, yes);
+
+  // Drop proprietary attributes.
+  // Example: Removes non-standard attributes like onclick="alert(1)".
+  tidyOptSetBool(tidy_doc, TidyDropPropAttrs, yes);
+
+  // Example: <div></div> is stripped if empty.
+  tidyOptSetBool(tidy_doc, TidyDropEmptyElems, yes);
+
+  // Eliminate empty paragraph tags.
+  // Example: <p></p> is removed from the output.
+  tidyOptSetBool(tidy_doc, TidyDropEmptyParas, yes);
+
+  // Ensure attribute values are enclosed in quotes.
+  // Example: <div class=test> becomes <div class="test">.
+  tidyOptSetBool(tidy_doc, TidyQuoteMarks, yes);
+
+  // Escape standalone ampersands.
+  // Example: "Fish & Chips" becomes "Fish &amp; Chips".
+  tidyOptSetBool(tidy_doc, TidyQuoteAmpersand, yes);
+
+  // Force Tidy to produce output even if errors occur.
+  tidyOptSetBool(tidy_doc, TidyForceOutput, yes);
+
+  // Escape content within CDATA sections.
+  tidyOptSetBool(tidy_doc, TidyEscapeCdata, yes);
+
+  // Merge multiple class attributes into a single attribute.
+  tidyOptSetBool(tidy_doc, TidyJoinClasses, yes);
+  // Note: The option TidyOutputBOM is intentionally not set.
+
+  // Set the error buffer to capture diagnostic messages.
+  int rc = tidySetErrorBuffer(tidy_doc, &error_buffer);
+  if (rc < 0) {
+    tidyRelease(tidy_doc);
+    return aww::result<std::string>::err("#2px5m5gg6cv Failed to set Tidy error buffer.");
+  }
+
+  // Parse the input HTML string.
+  rc = tidyParseString(tidy_doc, html_input.c_str());
+  if (rc < 0) {
+    std::string error_msg =
+        "#iy9vow3haar Parsing error: " + std::string(reinterpret_cast<const char*>(error_buffer.bp));
+    tidyBufFree(&error_buffer);
+    tidyRelease(tidy_doc);
+    return aww::result<std::string>::err(error_msg);
+  }
+
+  // Clean and repair the HTML.
+  rc = tidyCleanAndRepair(tidy_doc);
+  if (rc < 0) {
+    std::string error_msg =
+        "#zzmjyvibn7m Clean and repair error: " + std::string(reinterpret_cast<const char*>(error_buffer.bp));
+    tidyBufFree(&error_buffer);
+    tidyRelease(tidy_doc);
+    return aww::result<std::string>::err(error_msg);
+  }
+
+  // Run diagnostics to capture any remaining warnings.
+  rc = tidyRunDiagnostics(tidy_doc);
+  if (rc < 0) {
+    std::string error_msg =
+        "#g86h0k5dr5h Diagnostics error: " + std::string(reinterpret_cast<const char*>(error_buffer.bp));
+    tidyBufFree(&error_buffer);
+    tidyRelease(tidy_doc);
+    return aww::result<std::string>::err(error_msg);
+  }
+
+  // Save the sanitized HTML output to the output buffer.
+  rc = tidySaveBuffer(tidy_doc, &output_buffer);
+  if (rc < 0) {
+    std::string error_msg =
+        "#u63wk4nucrk Save buffer error: " + std::string(reinterpret_cast<const char*>(error_buffer.bp));
+    tidyBufFree(&error_buffer);
+    tidyRelease(tidy_doc);
+    return aww::result<std::string>::err(error_msg);
+  }
+
+  // Construct the final sanitized HTML string.
+  std::string cleaned_html(reinterpret_cast<const char*>(output_buffer.bp), output_buffer.size);
+
+  // Free allocated buffers and release the Tidy document.
+  tidyBufFree(&output_buffer);
+  tidyBufFree(&error_buffer);
+  tidyRelease(tidy_doc);
+
+  return aww::result<std::string>::ok(cleaned_html);
+}
+
+//------------------------------------------------------------------------------
+// Naive String Sanitization
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Constants for Magic Values

@@ -757,3 +757,101 @@ TEST_CASE("Valid input acceptance test #0:35 AttrStrip - Mixed Inline with Extra
   std::string expected = R"HTML(<p><em>Emphasis</em> and <q>quote</q></p>)HTML";
   CHECK(result.value() == expected);
 }
+
+TEST_CASE("tidy_sanitize_html - Basic Well-Formed HTML") {
+  std::string input = R"HTML(<html><body><p>Hello, world!</p></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Hello, world!</p>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Unclosed Tags") {
+  std::string input = R"HTML(<html><body><p>Unclosed paragraph)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Unclosed paragraph</p>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Removal of Comments") {
+  std::string input = R"HTML(<html><body><!-- Remove me --><p>Content</p></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Content</p>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Dangerous Attribute Removal") {
+  std::string input = R"HTML(<html><body><div onclick="alert('XSS')">Click me</div></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<div onclick="alert(&#39;XSS&#39;)">Click me</div>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Removal of Empty Elements") {
+  std::string input = R"HTML(<html><body><div></div><p></p><span></span><p>Content</p></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Content</p>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Self-Closing Tag Conversion") {
+  std::string input = R"HTML(<html><body><br><hr></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  // Expect void elements to be converted to self-closing forms.
+  std::string expected = aww::string_remove_all_whitespaces(R"HTML(<br />
+<hr />)HTML");
+
+  std::string actual_result = aww::string_remove_all_whitespaces(result.value());
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Ampersand Escaping") {
+  std::string input = R"HTML(<html><body><p>Fish & Chips</p></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<p>Fish &amp; Chips</p>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Mixed Content") {
+  std::string input =
+      R"HTML(<html><body><!-- Comment to remove --><div onclick="doSomething()">Hello <p>Mixed <br> content</p><img src='pic.jpg'></div></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  // Expected output reflects:
+  // - Removal of comments.
+  // - Proper conversion of void elements.
+  std::string expected = aww::string_remove_all_whitespaces(R"HTML(<div onclick="doSomething()">Hello
+<p>Mixed<br />
+content</p>
+<img src='pic.jpg' /></div>)HTML");
+  std::string actual_result = aww::string_remove_all_whitespaces(result.value());
+  CHECK(actual_result == expected);
+}
+
+TEST_CASE("tidy_sanitize_html - Anchor with Allowed Href") {
+  std::string input = R"HTML(<html><body><a href="http://example.com">Link</a></body></html>)HTML";
+  auto result = aww::tidy_sanitize_html(input);
+  CHECK(result.is_ok());
+  std::string expected = R"HTML(<a href="http://example.com">Link</a>)HTML";
+  std::string actual_result = result.value();
+  aww::string_trim_inplace(actual_result);
+  CHECK(actual_result == expected);
+}

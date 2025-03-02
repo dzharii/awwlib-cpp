@@ -20,6 +20,16 @@ void string_trim_right_inplace(std::string& str) {
 }
 
 /**
+ * @brief Removes all whitespace characters from the input string. (aww tag #19dy7v8pxxx)
+ */
+std::string string_remove_all_whitespaces(const std::string& input) {
+  std::string result = input;
+  result.erase(std::remove_if(result.begin(), result.end(), [](unsigned char c) { return std::isspace(c); }),
+               result.end());
+  return result;
+}
+
+/**
  * @brief Joins the elements of a vector into a single string with a specified delimiter. (aww tag #oibw1sg0jpv)
  */
 [[nodiscard]] std::string join_vector(const std::vector<std::string_view>& collection, std::string_view delimiter) {

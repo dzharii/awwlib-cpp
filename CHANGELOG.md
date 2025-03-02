@@ -2,6 +2,20 @@
 
 
 
+## 2025-03-02 
+
+**Added**: `aww::tidy_sanitize_html` – A new function that leverages the Tidy library to clean, repair, and reformat HTML input for safer downstream processing. `aww tag #wra83i2gpmi`
+
+**Added**: `aww::string_remove_all_whitespaces` – A utility function to remove all whitespace characters from a string, enhancing text normalization. Needed for testing. `aww tag #19dy7v8pxxx`
+
+**Updated**: Acceptance tests to cover the new functions, ensuring robust handling of diverse HTML and string inputs.
+
+**Why**: These additions improve security and consistency by sanitizing HTML content and simplifying whitespace management in text processing, aligning with our modern C++ best practices and code style guidelines.
+
+
+
+
+
 ## 2025-03-01
 
 added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for pandoc. Planning to use org files which will be converted to markdown. the goal is to use Emacs for maintaining the library documentation -- just for fun! But with the profit of some extended syntax, like includes. 
@@ -9,7 +23,7 @@ added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for 
 `sanitize_html` was wild change. It is somewhat stable, but I need to review the current tests
 
 - [ ] 🚩`sanitize_html` review the sanitizer tests
-- [ ] 🚩 found good sample for `sanitize_html`  [zino/phoenix/bin/sanitizer/sanitizer.cpp at 4deb77948e7485bf0caa9601941780fd64bacae2 · dionyziz/zino](https://github.com/dionyziz/zino/blob/4deb77948e7485bf0caa9601941780fd64bacae2/phoenix/bin/sanitizer/sanitizer.cpp) { github.com }
+- [x] 🚩 found good sample for `sanitize_html`  [zino/phoenix/bin/sanitizer/sanitizer.cpp at 4deb77948e7485bf0caa9601941780fd64bacae2 · dionyziz/zino](https://github.com/dionyziz/zino/blob/4deb77948e7485bf0caa9601941780fd64bacae2/phoenix/bin/sanitizer/sanitizer.cpp) { github.com }
 
 ```cpp
     TidyDoc tdoc = tidyCreate(); // initialize

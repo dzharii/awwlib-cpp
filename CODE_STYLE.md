@@ -1,6 +1,16 @@
 # Code Style
 Date: 2024-10-13
 
+## LLM
+
+- Use snake_case for all identifiers.
+- Prefix member variables with `m_`.
+- Document classes and functions using concise Doxygen `@brief` comments that describe their purpose rather than their implementation details.
+- Replace magic numbers with well-named constants.
+- Use `aww::result` for error handling and return values.
+- Write tests with doctest (only when explicitly requested).
+- Consistently apply modern C++ best practices (e.g., C++20 features).
+
 ## Project Structure
 
 The header and source naming conventions follow standard C++ style, which means we prefer to use `snake_case` for identifiers.

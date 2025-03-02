@@ -44,5 +44,16 @@ void string_trim_right_inplace(std::string& str);
  */
 void to_lower_case_inplace(std::string& str);
 
+/**
+ * @brief Removes all whitespace characters from the input string. (aww tag #19dy7v8pxxx)
+ *
+ * This function creates and returns a new string that is identical to the input string,
+ * except that all whitespace characters (as determined by std::isspace) have been removed.
+ *
+ * @param input The original string.
+ * @return A new string with all whitespace characters deleted.
+ */
+std::string string_remove_all_whitespaces(const std::string& input);
+
 } // namespace aww
 #endif // AWW_STRING_HPP
