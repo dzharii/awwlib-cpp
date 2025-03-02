@@ -52,7 +52,7 @@ const config: Config = {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: "awwlib",
+      title: "🏠 aww-lib",
       logo: {
         alt: "My Site Logo",
         src: "img/logo.svg",
@@ -62,19 +62,14 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: "tutorialSidebar",
           position: "left",
-          label: "Tutorial",
-        },
-        {
-          href: "https://github.com/facebook/docusaurus",
-          label: "GitHub",
-          position: "right",
+          label: "Docs",
         },
       ],
     },
     footer: {
       style: "dark",
-      links: [  ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      links: [],
+      copyright: `awwlib: the aww tools library. Docs built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

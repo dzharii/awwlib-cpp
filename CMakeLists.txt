@@ -21,6 +21,8 @@ endif()
 
 # Include external Lua project as a subdirectory
 add_subdirectory(external/lua)
+add_subdirectory(external/utf8proc-2.10.0)  
+add_subdirectory(external/tidy-5.8.0)
 
 # This magic allows to build Debug and Release configuration in separate
 # directories for Windows / Linux
@@ -71,6 +73,7 @@ set(SOURCES          # All .cpp files in src/
     src/aww-value-objects/aww-value-objects.cpp
     src/aww-pubsub/aww-pubsub.cpp
     src/aww-configuration-value-objects/aww-configuration-value-objects.cpp
+    src/aww-html/aww-html.cpp
     #ge0mh0v43gk
 )
 
@@ -105,10 +108,12 @@ target_include_directories(${LIBRARY_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/lua/src
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/v3.3.0/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/utf8proc-2.10.0
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/tidy-5.8.0/include
 )
 
 # There's also (probably) doctests within the library, so we need to see this as well.
-target_link_libraries(${LIBRARY_NAME} PUBLIC lua::lua sol2 doctest)
+target_link_libraries(${LIBRARY_NAME} PUBLIC lua::lua sol2 utf8proc doctest tidy-static)
 
 # Set the compile options you want (change as needed).
 target_set_warnings(${LIBRARY_NAME} ENABLE ALL AS_ERROR ALL DISABLE Annoying)

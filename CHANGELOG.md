@@ -1,5 +1,225 @@
 # AwwLib Changelog
 
+
+
+## 2025-03-01
+
+added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for pandoc. Planning to use org files which will be converted to markdown. the goal is to use Emacs for maintaining the library documentation -- just for fun! But with the profit of some extended syntax, like includes. 
+
+`sanitize_html` was wild change. It is somewhat stable, but I need to review the current tests
+
+- [ ] 🚩`sanitize_html` review the sanitizer tests
+- [ ] 🚩 found good sample for `sanitize_html`  [zino/phoenix/bin/sanitizer/sanitizer.cpp at 4deb77948e7485bf0caa9601941780fd64bacae2 · dionyziz/zino](https://github.com/dionyziz/zino/blob/4deb77948e7485bf0caa9601941780fd64bacae2/phoenix/bin/sanitizer/sanitizer.cpp) { github.com }
+
+```cpp
+    TidyDoc tdoc = tidyCreate(); // initialize
+
+    tidyOptSetInt( tdoc, TidyIndentContent, 0 );
+    tidyOptSetInt( tdoc, TidyWrapLen, 0 );
+    tidyOptSetValue( tdoc, TidyAltText, "" );
+    tidyOptSetValue( tdoc, TidyCharEncoding, "utf8" );
+    tidyOptSetBool( tdoc, TidyXhtmlOut, yes );
+    tidyOptSetBool( tdoc, TidyHideComments, yes );
+    tidyOptSetInt( tdoc, TidyBodyOnly, yes );
+    tidyOptSetBool( tdoc, TidyMakeClean, yes );
+    tidyOptSetBool( tdoc, TidyLogicalEmphasis, yes );
+    tidyOptSetBool( tdoc, TidyDropPropAttrs, yes );
+    tidyOptSetBool( tdoc, TidyDropFontTags, yes );
+    tidyOptSetBool( tdoc, TidyDropEmptyParas, yes );
+    tidyOptSetBool( tdoc, TidyQuoteMarks, yes );
+    tidyOptSetBool( tdoc, TidyQuoteAmpersand, yes );
+    tidyOptSetBool( tdoc, TidyForceOutput, yes );
+    tidyOptSetBool( tdoc, TidyEscapeCdata, yes );
+    tidyOptSetBool( tdoc, TidyJoinClasses, yes );
+    // tidyOptSetBool( tdoc, TidyOutputBOM, no );
+```
+
+
+
+## 2025-03-01 
+
+Plan: 
+
+1. libtidy will fix HTML and make it more xml parser friendly, it won't remove XSS
+2. New html sanitizer will potentially use dom based xml parser to remove/cleanup the tags and sanitize output. 
+
+
+
+## 2025-02-27 Late night libtidy!
+
+Included libtidy!
+
+2025-02-27 [Tidy Developer](https://www.html-tidy.org/developer/) {www.html-tidy.org}
+
+- 2025-02-27 [Tidy - Browse /5.8.0 at SourceForge.net](https://sourceforge.net/projects/html-tidy.mirror/files/5.8.0/) {sourceforge.net}
+
+> Design factors
+>
+> - **`libtidy`** is easy to integrate. Because of the near universal adoption of C linkage, a C interface may be called from a great number of programming languages.
+> - **`libtidy`** was designed to use opaque types in the public interface. This allows the application to just pass an integer around and the need to transform data types in different languages is minimized. As a results it’s straight-forward to write very thin library wrappers for C++, Pascal, and COM/ATL.
+> - **`libtidy`** eats its own dogfood. **HTML Tidy** links directly to **`libtidy`**.
+> - **`libtidy`** is Thread Safe and Re-entrant. Because there are many uses for HTML Tidy - from content validation, content scraping, conversion to XHTML - it was important to make **`libtidy`** run reasonably well within server applications as well as client side.
+> - **`libtidy`** uses adaptable I/O. As part of the larger integration strategy it was decided to fully abstract all I/O. This means a (relatively) clean separation between character encoding processing and shovelling bytes back and forth. Internally, the library reads from *sources* and writes to *sinks*. This abstraction is used for both markup and configuration “files”. Concrete implementations are provided for file and memory I/O, and new sources and sinks may be provided via the public interface.
+
+
+
+## 2025-02-26 
+
+Continue with `aww::sanitize_html`; I have found this amazing bag of XSSes:
+
+2025-02-26 🚩 [payloadbox/xss-payload-list: 🎯 Cross Site Scripting ( XSS ) Vulnerability Payload List](https://github.com/payloadbox/xss-payload-list) { github.com }
+
+
+
+Also, once the tests are fixed, it is time to extend the allowed tag list:
+
+> ✅ **Recommended Safe Text Elements**
+>
+> #### **Text Content and Inline Formatting**
+>
+> - `<b>` – Bold text (without emphasis)
+> - `<strong>` – Important text (semantic emphasis)
+> - `<i>` – Italicized text (without emphasis)
+> - `<em>` – Emphasized text (semantic emphasis)
+> - `<u>` – Underlined text
+> - `<s>` – Strikethrough text
+> - `<sub>` – Subscript text
+> - `<sup>` – Superscript text
+> - `<small>` – Smaller text
+> - `<mark>` – Highlighted text
+> - `<abbr>` – Abbreviations (with title attributes for explanations)
+> - `<cite>` – Citation of works
+> - `<q>` – Inline quotations
+> - `<code>` – Inline code snippets
+> - `<kbd>` – Keyboard input representation
+> - `<var>` – Variable names in programming/math context
+> - `<time>` – Machine-readable dates/times
+> - `<dfn>` – Definition term
+> - `<bdi>` – Bi-directional isolation
+> - `<bdo>` – Bi-directional override
+>
+> ------
+>
+> **Block-Level Text Content Elements**
+>
+> - `<p>` – Paragraphs
+> - `<blockquote>` – Block quotations
+> - `<pre>` – Preformatted text (for code blocks or ASCII art)
+> - `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>` – Headings
+> - `<hr>` – Horizontal rule (for thematic breaks)
+> - `<br>` – Line breaks
+>
+> ------
+>
+> **Lists (Textual Only)**
+>
+> - `<ul>` – Unordered lists
+> - `<ol>` – Ordered lists
+> - `<li>` – List items
+> - `<dl>` – Description lists
+> - `<dt>` – Description terms
+> - `<dd>` – Description definitions
+>
+> ------
+>
+> **Text-Related Links (Optional for Text Context)**
+>
+> - `<a>` – Hyperlinks (only if you sanitize `href` attributes properly)
+>
+> ------
+>
+> 🚫 **Elements to Exclude for Text-Only Sanitization**
+>
+> - `<div>`, `<span>` – Purely structural/neutral (unless you need attributes like `lang`, which you can whitelist separately)
+> - `<table>`, `<tr>`, `<td>`, `<th>` – Structural, not for plain text
+> - `<form>`, `<input>`, `<button>`, `<select>` – Interactive elements
+> - `<script>`, `<style>`, `<iframe>` – Security risks, always exclude
+> - `<img>`, `<video>`, `<audio>` – Media, not textual
+> - `<nav>`, `<aside>`, `<section>`, `<article>`, `<header>`, `<footer>` – Structural content
+> - `<figure>`, `<figcaption>` – Media captions (exclude unless captions are critical)
+> - `<canvas>`, `<svg>`, `<object>` – Non-text visual elements
+>
+> ------
+>
+> 🔒 **Security Considerations**
+>
+> - **Attributes**: Strip all attributes except safe ones (e.g., `href` in `<a>`, `title` in `<abbr>`, `datetime` in `<time>`).
+> - **Event Handlers**: Remove all `on*` event attributes (like `onclick`) to prevent XSS attacks.
+> - **Protocol Whitelisting**: For `<a href>`, allow only safe protocols (`http`, `https`, `mailto`), block `javascript:`, `data:`, etc.
+
+
+
+
+
+## 2025-02-25
+
+Continue with `aww::sanitize_html`
+
+I have discovered this project, which I am planning to use for testing and coding inspiration (yep, by rewriting some code)
+
+**Credit:**
+
+This set of tests was created by **Michael Ganss**.
+
+- **Author Profile:** [Michael Ganss on GitHub](https://github.com/mganss)
+- **Project:** [HtmlSanitizer on GitHub](https://github.com/mganss/HtmlSanitizer)
+  *HtmlSanitizer* is a .NET library that cleans HTML to prevent XSS attacks by removing unwanted tags, attributes, and scripts while allowing safe elements and formatting.
+
+
+
+
+
+## 2025-02-25
+
+I have added a new HTML sanitizer in our project (see `include/aww-html/aww-html.hpp`). The sanitizer now only allows safe tags (like `<h1>`–`<h6>`, `<p>`, `<b>`, `<i>`, `<em>`, `<strong>`, and `<a>`) and strips out everything else. For `<a>` tags, it keeps only the `href` attribute if it starts with "http://" or "https://", blocking unsafe URL schemes. It also auto-closes unclosed tags and detects obfuscated markup to prevent hidden injections. On top of that, I’ve added a feature to strip all HTML comments, so no hidden code remains.
+
+For example:
+
+```cpp
+std::string input = "<h1>Welcome</h1><p>Hello <!-- secret code --> World</p>";
+auto result = aww::sanitize_html(input);
+// result.value() returns: "<h1>Welcome</h1><p>Hello World</p>"
+```
+
+This update improves our security against XSS and other injection attacks.
+
+```cpp
+xss("<script>alert('XSS')</script>") == sanitized ==> ""
+xss("<img src=x onerror=alert('XSS')>") == sanitized ==> "&lt;img src=x onerror=alert('XSS')"
+xss("<a href=\"javascript:alert(1)\">Click me</a>") == sanitized ==> "<a>Click me</a>"
+xss("<scr<script>ipt>alert('XSS')</scr<script>ipt>") == sanitized ==> "alert('XSS')"
+xss("<!-- <script>alert('XSS')</script> -->") == sanitized ==> ""
+xss("<svg/onload=alert('XSS')>") == sanitized ==> "alert('XSS')"
+xss("<a href='data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=='>Test</a>") == sanitized ==> "<a>Test</a>"
+
+```
+
+
+
+## 2025-02-11
+
+Added utf8 library
+
+`external\utf8proc-2.10.0`
+
+
+
+2025-02-12 [JuliaStrings/utf8proc: a clean C library for processing UTF-8 Unicode data](https://github.com/JuliaStrings/utf8proc) { github.com }
+
+> [juliastrings.github.io/utf8proc/](http://juliastrings.github.io/utf8proc/)
+>
+> [utf8proc](http://juliastrings.github.io/utf8proc/) is a small, clean C library that provides Unicode normalization, case-folding, and other operations for data in the [UTF-8 encoding](http://en.wikipedia.org/wiki/UTF-8). It was [initially developed](http://www.public-software-group.org/utf8proc) by Jan Behrens and the rest of the [Public Software Group](http://www.public-software-group.org/), who deserve *nearly all of the credit* for this package. With the blessing of the Public Software Group, the [Julia developers](http://julialang.org/) have taken over development of utf8proc, since the original developers have moved to other projects.
+>
+> (utf8proc is used for basic Unicode support in the [Julia language](http://julialang.org/), and the Julia developers became involved because they wanted to add Unicode 7 support and other features.)
+>
+> (The original utf8proc package also includes Ruby and PostgreSQL plug-ins. We removed those from utf8proc in order to focus exclusively on the C library.)
+>
+> The utf8proc package is licensed under the free/open-source [MIT "expat" license](http://opensource.org/licenses/MIT) (plus certain Unicode data governed by the similarly permissive [Unicode data license](http://www.unicode.org/copyright.html#Exhibit1)); please see the included `LICENSE.md` file for more detailed information.
+
+And supporting acceptance tests at `tests/external-utf8proc/external-utf8proc-tests.cpp`
+
+
+
 ## 2025-02-08
 
 I have watched Jason Turner's talk:
