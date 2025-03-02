@@ -38,7 +38,7 @@ TEST_CASE("Tidy: Clean malformed HTML and produce valid output") {
   CHECK(err >= 0);
 
   // Save the cleaned-up HTML to a buffer.
-  TidyBuffer output = {nullptr, 0, 0, 0};
+  TidyBuffer output = {};
   err = tidySaveBuffer(tdoc, &output);
   CHECK(err >= 0);
 
@@ -61,7 +61,7 @@ TEST_CASE("Tidy: Check option behavior and error buffering") {
   tidyOptSetBool(tdoc, TidyQuiet, yes);
 
   // Allocate an error buffer and tell Tidy to use it.
-  TidyBuffer errbuf = {nullptr, 0, 0, 0};
+  TidyBuffer errbuf = {};
   tidySetErrorBuffer(tdoc, &errbuf);
 
   // Input HTML with a known error.
@@ -103,7 +103,7 @@ TEST_CASE("Tidy: Verify indentation and wrapping options") {
   err = tidyRunDiagnostics(tdoc);
   CHECK(err >= 0);
 
-  TidyBuffer output = {nullptr, 0, 0, 0};
+  TidyBuffer output = {};
   err = tidySaveBuffer(tdoc, &output);
   CHECK(err >= 0);
 
@@ -145,7 +145,7 @@ static std::string run_tidy(TidyDoc doc, const std::string& input_html) {
   err = tidyRunDiagnostics(doc);
   CHECK(err >= 0);
 
-  TidyBuffer output_buffer = {nullptr, 0, 0, 0};
+  TidyBuffer output_buffer = {};
   err = tidySaveBuffer(doc, &output_buffer);
   CHECK(err >= 0);
 
