@@ -121,7 +121,7 @@ TEST_CASE("Tidy: Verify indentation and wrapping options") {
  * @param doc The Tidy document to configure.
  */
 static void configure_tidy(TidyDoc doc) {
-  tidyOptSetBool(doc, TidyBodyOnly, yes);
+  tidyOptSetInt(doc, TidyBodyOnly, yes);
   tidyOptSetBool(doc, TidyForceOutput, yes);
   tidyOptSetBool(doc, TidyQuiet, yes);
   tidyOptSetBool(doc, TidyShowWarnings, no);
