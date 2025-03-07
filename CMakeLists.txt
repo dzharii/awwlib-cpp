@@ -109,7 +109,7 @@ target_include_directories(${LIBRARY_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/lua/src
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/v3.3.0/include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/utf8proc-2.10.0
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/tidy-5.8.0/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/tidy-5.8.0/include
 )
 
 # There's also (probably) doctests within the library, so we need to see this as well.
