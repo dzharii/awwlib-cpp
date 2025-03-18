@@ -2,6 +2,37 @@
 
 
 
+## 2025-03-17
+
+**Added**: `aww::single_producer_single_consumer_queue` `aww tag #51wb1rn83g0` – A new lock-free, single-producer single-consumer (SPSC) ring buffer queue implementation with a fixed buffer size (effective capacity is N-1). This queue leverages C++20 atomic wait/notify mechanisms to efficiently block on full conditions in `push()` while ensuring that `pop()` remains non-blocking when the queue is empty. Heavily inspired by [Fedor G. Pikus' implementation](https://github.com/PacktPublishing/Hands-On-Design-Patterns-with-CPP-Second-Edition/blob/main/Chapter18/21_lock_free_queue.C). 
+
+**Usage**:
+
+```cpp
+#include "aw-spsc-queue/aw-spsc-queue.hpp"
+#include <iostream>
+
+int main() {
+    aww::single_producer_single_consumer_queue<int, 1024> queue;
+    
+    // Producer: Push an element into the queue.
+    queue.push(42);
+    
+    // Consumer: Try to pop an element from the queue.
+    if (auto value = queue.pop()) {
+        std::cout << "Popped: " << *value << std::endl;
+    } else {
+        std::cout << "Queue is empty." << std::endl;
+    }
+    
+    return 0;
+}
+```
+
+**Why**: This addition provides a high-performance, thread-safe solution for single-producer single-consumer scenarios, ideal for logging and messaging. It takes advantage of modern C++20 features to optimize synchronization and reduce overhead in concurrent systems.
+
+
+
 ## 2025-03-02 
 
 **Added**: `aww::tidy_sanitize_html` – A new function that leverages the Tidy library to clean, repair, and reformat HTML input for safer downstream processing. `aww tag #wra83i2gpmi`

@@ -21,7 +21,7 @@ endif()
 
 # Include external Lua project as a subdirectory
 add_subdirectory(external/lua)
-add_subdirectory(external/utf8proc-2.10.0)  
+add_subdirectory(external/utf8proc-2.10.0)
 add_subdirectory(external/tidy-5.8.0)
 
 # This magic allows to build Debug and Release configuration in separate
@@ -74,6 +74,7 @@ set(SOURCES          # All .cpp files in src/
     src/aww-pubsub/aww-pubsub.cpp
     src/aww-configuration-value-objects/aww-configuration-value-objects.cpp
     src/aww-html/aww-html.cpp
+    src/aww-spsc-queue/aww-spsc-queue.cpp
     #ge0mh0v43gk
 )
 

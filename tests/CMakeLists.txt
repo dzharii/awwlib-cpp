@@ -15,7 +15,7 @@ set(TESTFILES        # All .cpp files in tests/
     external-utf8proc/external-utf8proc-tests.cpp
     external-tidy/external-tidy-tests.cpp
     aww-html/aww-html-tests.cpp
-    # aww-html/aww-html-sanitize_html-mganss-HtmlSanitizertests.cpp
+    aww-spsc-queue/aww-spsc-queue-tests.cpp
     #faudv6fbgzt
 )
 
