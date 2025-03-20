@@ -75,6 +75,16 @@ public:
     m_front.value.notify_one();
     return result;
   }
+
+  [[nodiscard]]
+  std::size_t front() {
+    return m_front.value.load(std::memory_order_relaxed);
+  }
+
+  [[nodiscard]]
+  std::size_t back() {
+    return m_back.value.load(std::memory_order_relaxed);
+  }
 };
 
 #if defined(_MSC_VER)
