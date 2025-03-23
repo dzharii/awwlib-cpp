@@ -82,3 +82,40 @@ TEST_CASE("Test get_current_executable_path returns the correct executable path"
 
   CHECK_MESSAGE(correctFilename, message);
 }
+
+TEST_CASE("has_redirected_standard_input: Standard input attached to terminal") {
+  // When standard input is attached to a terminal, this function should return false.
+  // Note: In some automated environments (e.g. CI systems), this may already be redirected.
+  CHECK(aww::has_redirected_standard_input() == false);
+}
+
+TEST_CASE("has_redirected_standard_input: Standard input redirected") {
+  // Create a temporary file to simulate redirected input.
+  std::string tmp_file_name = "temp_stdin.txt";
+  {
+    std::ofstream ofs(tmp_file_name);
+    ofs << "Sample input for testing.\n";
+  }
+
+  // RAII guard to restore standard input and clean up the temporary file.
+  struct stdin_restore {
+    std::string file_name;
+    stdin_restore(const std::string& fn) : file_name(fn) {
+    }
+    ~stdin_restore() {
+#ifdef _WIN32
+      freopen("CON", "r", stdin);
+#else
+      freopen("/dev/tty", "r", stdin);
+#endif
+      std::remove(file_name.c_str());
+    }
+  } guard(tmp_file_name);
+
+  // Redirect stdin to the temporary file.
+  FILE* file = freopen(tmp_file_name.c_str(), "r", stdin);
+  REQUIRE(file != nullptr);
+
+  // Verify that the function correctly detects redirected standard input.
+  CHECK(aww::has_redirected_standard_input() == true);
+}

@@ -42,4 +42,11 @@ std::vector<std::string> get_command_line_arguments(int argc, char* argv[]) {
   return cmdArgs;
 }
 
+/**
+ * @brief Checks whether the standard input is redirected (aww tag #1b2868tven2).
+ */
+bool has_redirected_standard_input() {
+  return !isatty(fileno(stdin));
+}
+
 } // namespace aww

@@ -2,6 +2,28 @@
 
 
 
+## 2025-03-23
+
+**Added**: `aww::has_redirected_standard_input` `aww tag #1b2868tven2` – A utility function that checks whether the standard input is redirected (i.e., not attached to a terminal). In typical scenarios, this occurs when one application's output is piped or redirected as input to another application—for example, in a shell pipeline where one program's output serves as the input for another.
+
+**Usage**:
+
+```cpp
+#include "aww-os/aww-os.hpp"
+#include <iostream>
+
+int main() {
+    if (aww::has_redirected_standard_input()) {
+        std::cout << "Standard input is redirected." << std::endl;
+    } else {
+        std::cout << "Standard input is attached to a terminal." << std::endl;
+    }
+    return 0;
+}
+```
+
+**Why**: This addition provides a portable and straightforward method for detecting the input source, enabling applications to adjust their behavior in environments where standard input might come from a pipe or file instead of an interactive terminal.
+
 ## 2025-03-17
 
 **Added**: `aww::single_producer_single_consumer_queue` `aww tag #51wb1rn83g0` – A new lock-free, single-producer single-consumer (SPSC) ring buffer queue implementation with a fixed buffer size (effective capacity is N-1). This queue leverages C++20 atomic wait/notify mechanisms to efficiently block on full conditions in `push()` while ensuring that `pop()` remains non-blocking when the queue is empty. Heavily inspired by [Fedor G. Pikus' implementation](https://github.com/PacktPublishing/Hands-On-Design-Patterns-with-CPP-Second-Edition/blob/main/Chapter18/21_lock_free_queue.C). 

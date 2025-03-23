@@ -52,5 +52,15 @@ std::optional<std::filesystem::path> get_user_home_folder();
  */
 std::vector<std::string> get_command_line_arguments(int argc, char* argv[]);
 
+/**
+ * @brief Checks whether the standard input is redirected (aww tag #1b2868tven2).
+ *
+ * In typical scenarios, this occurs when the output of one application is piped or redirected as input
+ * to another application—for example, in a shell pipeline where one program's output serves as the input for another.
+ *
+ * @return true if standard input is redirected; false if it is attached to a terminal.
+ */
+bool has_redirected_standard_input();
+
 } // namespace aww
 #endif // AWW_OS_HPP

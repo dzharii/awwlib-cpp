@@ -1,5 +1,6 @@
 #include "Windows.h"
 #include "aww-os/aww-os.hpp"
+#include <io.h>
 
 namespace aww {
 /**
@@ -72,6 +73,13 @@ std::vector<std::string> get_command_line_arguments([[maybe_unused]] int argc_un
   utf8_args.erase(utf8_args.begin());
 
   return utf8_args;
+}
+
+/**
+ * @brief Checks whether the standard input is redirected (aww tag #1b2868tven2).
+ */
+bool has_redirected_standard_input() {
+  return !_isatty(_fileno(stdin));
 }
 
 } // namespace aww
