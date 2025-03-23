@@ -855,3 +855,33 @@ TEST_CASE("tidy_sanitize_html - Anchor with Allowed Href") {
   aww::string_trim_inplace(actual_result);
   CHECK(actual_result == expected);
 }
+
+TEST_CASE("escape_string_as_json_string: Basic string") {
+  std::string input = "Hello World";
+  std::string expected = "\"Hello World\"";
+  CHECK(aww::escape_string_as_json_string(input) == expected);
+}
+
+TEST_CASE("escape_string_as_json_string: String with double quotes") {
+  std::string input = "Hello \"World\"";
+  std::string expected = "\"Hello \\\"World\\\"\"";
+  CHECK(aww::escape_string_as_json_string(input) == expected);
+}
+
+TEST_CASE("escape_string_as_json_string: String with backslashes") {
+  std::string input = "Back\\slash";
+  std::string expected = "\"Back\\\\slash\"";
+  CHECK(aww::escape_string_as_json_string(input) == expected);
+}
+
+TEST_CASE("escape_string_as_json_string: String with newline and carriage return") {
+  std::string input = "Line1\nLine2\rLine3";
+  std::string expected = "\"Line1\\nLine2\\rLine3\"";
+  CHECK(aww::escape_string_as_json_string(input) == expected);
+}
+
+TEST_CASE("escape_string_as_json_string: String with single quotes") {
+  std::string input = "It's a test";
+  std::string expected = "\"It\\'s a test\"";
+  CHECK(aww::escape_string_as_json_string(input) == expected);
+}

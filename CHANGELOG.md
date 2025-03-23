@@ -24,6 +24,11 @@ int main() {
 
 **Why**: This addition provides a portable and straightforward method for detecting the input source, enabling applications to adjust their behavior in environments where standard input might come from a pipe or file instead of an interactive terminal.
 
+**Added**: `aww::escape_string_as_json_string` `aww tag #z2acbye25pu` – A new function that escapes special characters in a string for safe embedding as a JSON string literal. The function processes backslashes, quotes, newlines, and carriage returns, and encloses the output in double quotes. This utility is ideal for generating valid JSON strings from arbitrary input.
+
+
+
+
 ## 2025-03-17
 
 **Added**: `aww::single_producer_single_consumer_queue` `aww tag #51wb1rn83g0` – A new lock-free, single-producer single-consumer (SPSC) ring buffer queue implementation with a fixed buffer size (effective capacity is N-1). This queue leverages C++20 atomic wait/notify mechanisms to efficiently block on full conditions in `push()` while ensuring that `pop()` remains non-blocking when the queue is empty. Heavily inspired by [Fedor G. Pikus' implementation](https://github.com/PacktPublishing/Hands-On-Design-Patterns-with-CPP-Second-Edition/blob/main/Chapter18/21_lock_free_queue.C). 

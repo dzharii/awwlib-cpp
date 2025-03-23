@@ -709,6 +709,44 @@ aww::result<std::string> sanitize_html(const std::string& input,
   return aww::result<std::string>::ok(output);
 }
 
+/**
+ * @brief Escapes a string for safe embedding as a JSON string literal. (aww tag #z2acbye25pu)
+ *
+ * This function converts special characters in the input string (such as backslashes, quotes,
+ * newlines, and carriage returns) into their corresponding escaped representations. The resulting
+ * string is then enclosed in double quotes, making it suitable for direct use in JSON contexts.
+ *
+ * @param input The string to be escaped.
+ * @return A new string representing the escaped JSON string literal.
+ */
+inline std::string escape_string_as_json_string(const std::string& input) {
+  std::string output = "\"";
+  for (char c : input) {
+    switch (c) {
+    case '\\':
+      output += "\\\\";
+      break;
+    case '\"':
+      output += "\\\"";
+      break;
+    case '\'':
+      output += "\\\'";
+      break;
+    case '\n':
+      output += "\\n";
+      break;
+    case '\r':
+      output += "\\r";
+      break;
+    default:
+      output.push_back(c);
+      break;
+    }
+  }
+  output += "\"";
+  return output;
+}
+
 } // namespace aww
 
 #endif // AWW_HTML_HPP
