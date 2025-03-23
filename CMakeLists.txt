@@ -8,8 +8,6 @@
 cmake_minimum_required(VERSION 3.22)
 
 # Set project name, version and laguages here. (change as needed)
-# Version numbers are available by including "exampleConfig.h" in
-# the source. See exampleConfig.h.in for some more details.
 project(AWWLIB VERSION 1.0.0 LANGUAGES CXX)
 
 # Determine if we are the top-level project
@@ -65,7 +63,6 @@ find_lto(CXX)
 #                         Locate files (change as needed).
 # --------------------------------------------------------------------------------
 set(SOURCES          # All .cpp files in src/
-    src/example.cpp
     src/aww-string/aww-string.cpp
     src/aww-os/aww-os.cpp
     src/aww-result/aww-result.cpp

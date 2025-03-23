@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.22)
 # List all files containing tests. (Change as needed)
 set(TESTFILES        # All .cpp files in tests/
     main.cpp
-    dummy.cpp
     aww-string/aww-string-tests.cpp
     aww-os/aww-os-tests.cpp
     aww-result/aww-result-tests.cpp

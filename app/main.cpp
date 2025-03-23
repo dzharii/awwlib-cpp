@@ -6,8 +6,6 @@
 #include "doctest/doctest.h"
 #endif
 
-#include "example.h"
-#include "exampleConfig.h"
 #include <cstdlib>
 #include <iostream>
 #include <lua.hpp>
@@ -39,9 +37,6 @@ int lua_fibonacci(lua_State* L) {
  * CMake definitions (here the version number) from source code.
  */
 int main() {
-  std::cout << "C++ Boiler Plate v" << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << "."
-            << PROJECT_VERSION_PATCH << std::endl;
-
   lua_State* L = luaL_newstate();
   luaL_openlibs(L);
 
@@ -64,12 +59,4 @@ int main() {
   }
 
   lua_close(L);
-
-  // Display LICENSE file content (non-essential for most builds)
-  [[maybe_unused]] int res = std::system("cat ../LICENSE");
-
-  // Bring in the dummy class from the example source,
-  // just to show that it is accessible from main.cpp.
-  Dummy d;
-  return d.doSomething() ? 0 : -1;
 }
