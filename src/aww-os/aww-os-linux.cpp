@@ -21,12 +21,12 @@ std::optional<std::filesystem::path> get_user_home_folder() {
   auto home = aww::getenv("HOME");
 
   if (home.has_value()) {
-    return std::filesystem::path(home.value());
+    return std::filesystem::absolute(std::filesystem::path(home.value()));
   }
 
   struct passwd* pw = getpwuid(getuid());
   if (pw != nullptr) {
-    return std::filesystem::path(pw->pw_dir);
+    return std::filesystem::absolute(std::filesystem::path(pw->pw_dir));
   }
 
   return std::nullopt;

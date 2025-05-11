@@ -119,3 +119,41 @@ TEST_CASE("has_redirected_standard_input: Standard input redirected") {
   // Verify that the function correctly detects redirected standard input.
   CHECK(aww::has_redirected_standard_input() == true);
 }
+
+TEST_CASE("get_user_home_folder returns a valid path if HOME is set") {
+#ifdef _WIN32
+  const char* env_var = "USERPROFILE";
+#else
+  const char* env_var = "HOME";
+#endif
+  auto env_value = aww::getenv(env_var);
+  auto home_path_opt = aww::get_user_home_folder();
+  REQUIRE(home_path_opt.has_value());
+  auto home_path = home_path_opt.value();
+  CHECK(std::filesystem::exists(home_path));
+  if (env_value.has_value()) {
+    CHECK(home_path == std::filesystem::absolute(std::filesystem::path(env_value.value())));
+  }
+#ifdef _WIN32
+  CHECK(home_path.string().find("Users") != std::string::npos);
+#else
+  CHECK(home_path.string().find("home") != std::string::npos);
+#endif
+}
+
+TEST_CASE("get_user_home_folder returns a valid path if HOME is not set (Linux only)") {
+#ifndef _WIN32
+  // Save and unset HOME
+  auto orig_home = aww::getenv("HOME");
+  unsetenv("HOME");
+  auto home_path_opt = aww::get_user_home_folder();
+  REQUIRE(home_path_opt.has_value());
+  auto home_path = home_path_opt.value();
+  CHECK(std::filesystem::exists(home_path));
+  CHECK(home_path.string().find("home") != std::string::npos);
+  // Restore HOME
+  if (orig_home.has_value()) {
+    setenv("HOME", orig_home.value().c_str(), 1);
+  }
+#endif
+}

@@ -25,9 +25,9 @@ std::optional<std::filesystem::path> get_user_home_folder() {
   auto user_profile = aww::getenv("USERPROFILE");
 
   if (home_drive.has_value() && home_path.has_value()) {
-    return std::filesystem::path(home_drive.value() + home_path.value());
+    return std::filesystem::absolute(std::filesystem::path(home_drive.value() + home_path.value()));
   } else if (user_profile.has_value()) {
-    return std::filesystem::path(user_profile.value());
+    return std::filesystem::absolute(std::filesystem::path(user_profile.value()));
   }
   return std::nullopt;
 }

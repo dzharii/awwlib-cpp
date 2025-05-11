@@ -33,7 +33,7 @@ std::optional<std::string> getenv(const std::string& env_variable_name);
 std::filesystem::path get_current_executable_path();
 
 /**
- * Retrieves the home directory of the current user. (aww tag #armgs22u42a)
+ * Retrieves the absolute path to home directory of the current user. (aww tag #armgs22u42a)
  *
  * This function uses platform-specific methods to determine the home directory of the current user.
  * It works across different operating systems such as Windows and Linux.
