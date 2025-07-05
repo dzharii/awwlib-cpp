@@ -53,8 +53,9 @@ include(Colors)
 include(CTest)
 include(Doctest)
 include(LTO)
-include(Misc)
 include(Warnings)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 # Check for LTO support.
 find_lto(CXX)
