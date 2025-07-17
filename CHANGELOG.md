@@ -13,7 +13,7 @@
 
 int main() {
     std::string raw = u8"пример:файл/backup";
-    std::string safe = aww::safe_filename_from_string(raw);
+    std::string safe = aww::safe_filename_from_string(raw, "_");
     std::cout << safe; // prints: пример_файл_backup
 }
 ```
