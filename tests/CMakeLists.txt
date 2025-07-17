@@ -15,6 +15,7 @@ set(TESTFILES        # All .cpp files in tests/
     external-tidy/external-tidy-tests.cpp
     aww-html/aww-html-tests.cpp
     aww-spsc-queue/aww-spsc-queue-tests.cpp
+    aww-special-string/aww-special-string-tests.cpp
     #faudv6fbgzt
 )
 

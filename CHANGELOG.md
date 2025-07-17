@@ -1,6 +1,24 @@
 # AwwLib Changelog
 
 
+## 2025-07-16
+
+**Added**: `aww::safe_filename_from_string` `aww tag #5srgabrgn2t` – Cross-platform function that converts arbitrary text into a file-system-safe name. It replaces every Windows- or POSIX-forbidden character with a single underscore, collapses consecutive replacements, trims trailing dots and spaces, and returns an empty string if no valid characters remain.
+
+**Usage**:
+
+```cpp
+#include "aww-special-string/aww-special-string.hpp"
+#include <iostream>
+
+int main() {
+    std::string raw = u8"пример:файл/backup";
+    std::string safe = aww::safe_filename_from_string(raw);
+    std::cout << safe; // prints: пример_файл_backup
+}
+```
+
+**Why**: Ensures that filenames generated at runtime are valid on both Windows and Linux, avoiding errors caused by illegal characters or platform-specific constraints.
 
 ## 2025-03-23
 
@@ -31,7 +49,7 @@ int main() {
 
 ## 2025-03-17
 
-**Added**: `aww::single_producer_single_consumer_queue` `aww tag #51wb1rn83g0` – A new lock-free, single-producer single-consumer (SPSC) ring buffer queue implementation with a fixed buffer size (effective capacity is N-1). This queue leverages C++20 atomic wait/notify mechanisms to efficiently block on full conditions in `push()` while ensuring that `pop()` remains non-blocking when the queue is empty. Heavily inspired by [Fedor G. Pikus' implementation](https://github.com/PacktPublishing/Hands-On-Design-Patterns-with-CPP-Second-Edition/blob/main/Chapter18/21_lock_free_queue.C). 
+**Added**: `aww::single_producer_single_consumer_queue` `aww tag #51wb1rn83g0` – A new lock-free, single-producer single-consumer (SPSC) ring buffer queue implementation with a fixed buffer size (effective capacity is N-1). This queue leverages C++20 atomic wait/notify mechanisms to efficiently block on full conditions in `push()` while ensuring that `pop()` remains non-blocking when the queue is empty. Heavily inspired by [Fedor G. Pikus' implementation](https://github.com/PacktPublishing/Hands-On-Design-Patterns-with-CPP-Second-Edition/blob/main/Chapter18/21_lock_free_queue.C).
 
 **Usage**:
 
@@ -41,17 +59,17 @@ int main() {
 
 int main() {
     aww::single_producer_single_consumer_queue<int, 1024> queue;
-    
+
     // Producer: Push an element into the queue.
     queue.push(42);
-    
+
     // Consumer: Try to pop an element from the queue.
     if (auto value = queue.pop()) {
         std::cout << "Popped: " << *value << std::endl;
     } else {
         std::cout << "Queue is empty." << std::endl;
     }
-    
+
     return 0;
 }
 ```
@@ -60,7 +78,7 @@ int main() {
 
 
 
-## 2025-03-02 
+## 2025-03-02
 
 **Added**: `aww::tidy_sanitize_html` – A new function that leverages the Tidy library to clean, repair, and reformat HTML input for safer downstream processing. `aww tag #wra83i2gpmi`
 
@@ -76,7 +94,7 @@ int main() {
 
 ## 2025-03-01
 
-added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for pandoc. Planning to use org files which will be converted to markdown. the goal is to use Emacs for maintaining the library documentation -- just for fun! But with the profit of some extended syntax, like includes. 
+added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for pandoc. Planning to use org files which will be converted to markdown. the goal is to use Emacs for maintaining the library documentation -- just for fun! But with the profit of some extended syntax, like includes.
 
 `sanitize_html` was wild change. It is somewhat stable, but I need to review the current tests
 
@@ -108,12 +126,12 @@ added `awwlib-cpp\website\my-modules\pandoc-installer-wrapper` --  a helper for 
 
 
 
-## 2025-03-01 
+## 2025-03-01
 
-Plan: 
+Plan:
 
 1. libtidy will fix HTML and make it more xml parser friendly, it won't remove XSS
-2. New html sanitizer will potentially use dom based xml parser to remove/cleanup the tags and sanitize output. 
+2. New html sanitizer will potentially use dom based xml parser to remove/cleanup the tags and sanitize output.
 
 
 
@@ -135,7 +153,7 @@ Included libtidy!
 
 
 
-## 2025-02-26 
+## 2025-02-26
 
 Continue with `aww::sanitize_html`; I have found this amazing bag of XSSes:
 

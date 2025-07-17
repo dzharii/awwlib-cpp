@@ -73,6 +73,7 @@ set(SOURCES          # All .cpp files in src/
     src/aww-configuration-value-objects/aww-configuration-value-objects.cpp
     src/aww-html/aww-html.cpp
     src/aww-spsc-queue/aww-spsc-queue.cpp
+    src/aww-special-string/aww-special-string.cpp
     #ge0mh0v43gk
 )
 
